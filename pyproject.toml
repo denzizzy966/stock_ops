@@ -4,7 +4,7 @@ authors = [
     { name = "RMI", email = "denzizzy966@gmail.com"}
 ]
 description = "Mobile PWA for Material Request and Stock Entry"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 readme = "README.md"
 dynamic = ["version"]
 dependencies = [
@@ -25,7 +25,7 @@ packages = []
 
 [tool.ruff]
 line-length = 110
-target-version = "py314"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = [
