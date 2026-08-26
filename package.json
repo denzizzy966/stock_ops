@@ -1,0 +1,7 @@
+{
+  "name": "stock_ops",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd frontend && npm install --no-audit --no-fund && npm run build:frappe"
+  }
+}
