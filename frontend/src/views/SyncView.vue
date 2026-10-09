@@ -44,7 +44,7 @@ const synced = computed(() => docs.docs.filter((d) => d.status === 'synced'))
 
     <div class="section-title">{{ t('sync.outbox') }} ({{ outbox.length }})</div>
     <div v-if="!outbox.length" class="empty" style="padding: 30px">
-      <div class="big">✅</div>
+      <div class="big"><Icon name="check-circle" /></div>
       {{ t('sync.allSynced') }}
     </div>
     <div
@@ -54,7 +54,7 @@ const synced = computed(() => docs.docs.filter((d) => d.status === 'synced'))
       style="cursor: pointer; margin-bottom: 10px"
       @click="router.push(`/doc/${d.localId}`)"
     >
-      <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }">{{ DOC_TYPES[d.type].icon }}</span>
+      <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }"><Icon :name="DOC_TYPES[d.type].icon" /></span>
       <div class="grow">
         <div class="truncate" style="font-weight: 600">{{ t('docType.' + d.type) }} · {{ d.items.length }} {{ t('common.items') }}</div>
         <div class="tiny muted">{{ fmtDateTime(d.createdAt) }}</div>

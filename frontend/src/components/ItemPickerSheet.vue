@@ -70,7 +70,7 @@ function onDetected(code) {
   <Sheet :title="t('picker.title')" @close="emit('close')">
     <div class="row" style="gap: 8px; margin-bottom: 8px">
       <SearchInput v-model="q" :placeholder="t('picker.searchPlaceholder')" class="grow" />
-      <button class="btn brand" style="padding: 12px 14px" @click="showScanner = true" :title="t('scan.title')">📷</button>
+      <button class="btn brand" style="padding: 12px 14px" @click="showScanner = true" :title="t('scan.title')"><Icon name="camera" /></button>
     </div>
     <div v-if="warehouse" class="tiny muted" style="margin: 0 4px 10px">
       {{ t('picker.stockAt', { wh: warehouse }) }}<span v-if="loadingStock"> · {{ t('common.loading') }}</span>
@@ -86,11 +86,11 @@ function onDetected(code) {
       <span v-if="warehouse" class="stk-badge" :class="{ zero: stockOf(it) <= 0 }">
         {{ stockOf(it) }} <span class="tiny">{{ it.stock_uom }}</span>
       </span>
-      <span style="font-size: 22px; color: var(--brand)">＋</span>
+      <span style="font-size: 22px; color: var(--brand)"><Icon name="plus" /></span>
     </div>
 
     <div v-if="!results.length" class="empty">
-      <div class="big">🔍</div>
+      <div class="big"><Icon name="search" /></div>
       {{ t('picker.noMatch') }}
     </div>
 

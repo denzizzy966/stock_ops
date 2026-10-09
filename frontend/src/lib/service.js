@@ -114,6 +114,8 @@ export const getApprovalDetail = (name) => call('stock_ops.api.get_approval_deta
 
 // Status terkini dokumen server (untuk sinkronkan tampilan lokal: docstatus + workflow_state)
 export const getDocState = (doctype, name) => call('stock_ops.api.get_doc_state', { doctype, name })
+// Detail dokumen server untuk ditampilkan di aplikasi (Daftar > Server)
+export const getServerDoc = (doctype, name) => call('stock_ops.api.get_server_doc', { doctype, name })
 
 // Resolve kode (barcode/item_code/nama) → item_code (untuk hasil scan)
 export const resolveItem = (code) => call('stock_ops.api.resolve_item', { code })

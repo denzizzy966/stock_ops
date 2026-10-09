@@ -6,9 +6,13 @@ import './styles/main.css'
 import { useApp } from './stores/app'
 import { useMaster } from './stores/master'
 
+import Icon from './components/Icon.vue'
+
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
+// Ikon SVG (Font Awesome Free) tersedia di semua template sebagai <Icon name="…" />
+app.component('Icon', Icon)
 
 // mulai pantau status jaringan + tema
 const appStore = useApp()

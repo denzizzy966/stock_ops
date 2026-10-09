@@ -29,7 +29,7 @@ const qtnTypes = computed(() => (master.canQuotation ? DOC_TYPE_LIST.filter((x) 
       style="width: 100%; text-align: left; border: 0; cursor: pointer"
       @click="router.push(`/form/${ty.key}`)"
     >
-      <span class="lead-icon" :style="{ background: ty.color }">{{ ty.icon }}</span>
+      <span class="lead-icon" :style="{ background: ty.color }"><Icon :name="ty.icon" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('docType.' + ty.key) }}</div>
         <div class="tiny muted">{{ ty.doctype }} · {{ ty.meta }}</div>
@@ -45,7 +45,7 @@ const qtnTypes = computed(() => (master.canQuotation ? DOC_TYPE_LIST.filter((x) 
       style="width: 100%; text-align: left; border: 0; cursor: pointer"
       @click="router.push(`/form/${ty.key}`)"
     >
-      <span class="lead-icon" :style="{ background: ty.color }">{{ ty.icon }}</span>
+      <span class="lead-icon" :style="{ background: ty.color }"><Icon :name="ty.icon" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('docType.' + ty.key) }}</div>
         <div class="tiny muted">{{ ty.doctype }} · {{ ty.meta }}</div>
@@ -61,7 +61,7 @@ const qtnTypes = computed(() => (master.canQuotation ? DOC_TYPE_LIST.filter((x) 
       style="width: 100%; text-align: left; border: 0; cursor: pointer"
       @click="router.push(`/form/${ty.key}`)"
     >
-      <span class="lead-icon" :style="{ background: ty.color }">{{ ty.icon }}</span>
+      <span class="lead-icon" :style="{ background: ty.color }"><Icon :name="ty.icon" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('docType.' + ty.key) }}</div>
         <div class="tiny muted">{{ ty.doctype }} · {{ ty.meta }}</div>
@@ -77,7 +77,7 @@ const qtnTypes = computed(() => (master.canQuotation ? DOC_TYPE_LIST.filter((x) 
       style="width: 100%; text-align: left; border: 0; cursor: pointer"
       @click="router.push('/return')"
     >
-      <span class="lead-icon" :style="{ background: ty.color }">{{ ty.icon }}</span>
+      <span class="lead-icon" :style="{ background: ty.color }"><Icon :name="ty.icon" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('docType.' + ty.key) }}</div>
         <div class="tiny muted">{{ ty.doctype }} · {{ ty.meta }}</div>
@@ -93,7 +93,7 @@ const qtnTypes = computed(() => (master.canQuotation ? DOC_TYPE_LIST.filter((x) 
       style="width: 100%; text-align: left; border: 0; cursor: pointer"
       @click="router.push(`/form/${ty.key}`)"
     >
-      <span class="lead-icon" :style="{ background: ty.color }">{{ ty.icon }}</span>
+      <span class="lead-icon" :style="{ background: ty.color }"><Icon :name="ty.icon" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('docType.' + ty.key) }}</div>
         <div class="tiny muted">{{ ty.doctype }} · {{ ty.meta }}</div>

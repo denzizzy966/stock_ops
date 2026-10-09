@@ -70,7 +70,7 @@ async function captureLocation(silent = false) {
   locating.value = false
   if (g) {
     doc.geo = g
-    if (!silent) app.notify('📍 ' + g, 'success')
+    if (!silent) app.notify(g, 'success')
   } else if (!silent) {
     app.notify(t('form.locationOff'), 'warn')
   }
@@ -109,7 +109,7 @@ async function save() {
   <div class="content">
     <div class="card">
       <div class="row" style="gap: 10px; margin-bottom: 12px">
-        <span class="lead-icon" :style="{ background: cfg.color }">{{ cfg.icon }}</span>
+        <span class="lead-icon" :style="{ background: cfg.color }"><Icon :name="cfg.icon" /></span>
         <div class="grow">
           <div style="font-weight: 700">{{ t('docType.RET') }}</div>
           <div class="tiny muted">{{ cfg.doctype }} · is_return</div>
@@ -119,7 +119,7 @@ async function save() {
       <div class="field">
         <label>{{ t('ret.receipt') }}</label>
         <div v-if="doc.returnAgainst" class="row between" style="gap: 8px; align-items: center">
-          <span class="po-chip">📦 {{ doc.returnAgainst }}</span>
+          <span class="po-chip"><Icon name="box" /> {{ doc.returnAgainst }}</span>
           <button class="btn sm" @click="clearReceipt">{{ t('common.clear') }}</button>
         </div>
         <button v-else class="btn block brand" :disabled="loadingReceipt" @click="showReceipt = true">
@@ -150,7 +150,7 @@ async function save() {
       </div>
 
       <div v-if="!doc.items.length" class="empty" style="padding: 26px">
-        <div class="big">↩️</div>
+        <div class="big"><Icon name="return" /></div>
         {{ t('ret.pickFirst') }}
       </div>
 
@@ -198,7 +198,7 @@ async function save() {
     <div class="card mt12">
       <div class="row between">
         <div style="min-width: 0">
-          <div style="font-weight: 700">📍 {{ t('form.location') }}</div>
+          <div style="font-weight: 700"><Icon name="location" /> {{ t('form.location') }}</div>
           <div v-if="doc.geo" class="tiny muted truncate">{{ doc.geo }}</div>
           <div v-else class="tiny muted">—</div>
         </div>

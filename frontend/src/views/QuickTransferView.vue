@@ -7,7 +7,7 @@ import { useMaster } from '../stores/master'
 import { useI18n } from '../lib/i18n'
 import AppBar from '../components/AppBar.vue'
 import ItemPickerSheet from '../components/ItemPickerSheet.vue'
-import WarehouseSelect from '../components/WarehouseSelect.vue'
+import SearchSelect from '../components/SearchSelect.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -87,18 +87,18 @@ async function submit() {
             <div class="grow"><div class="truncate" style="font-weight: 600">{{ form.item.item_name }}</div><div class="tiny muted">{{ form.item.item_code }}</div></div>
           </template>
           <div v-else class="grow muted">{{ t('qt.pickItem') }}</div>
-          <span style="font-size: 20px; color: var(--muted)">🔎</span>
+          <span style="font-size: 20px; color: var(--muted)"><Icon name="search" /></span>
         </button>
       </div>
 
       <div class="field-row">
         <div class="field">
           <label>{{ t('qt.from') }}</label>
-          <WarehouseSelect v-model="form.from" :options="warehouseOptions" :placeholder="t('qt.from')" />
+          <SearchSelect :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" v-model="form.from" :options="warehouseOptions" :placeholder="t('qt.from')" />
         </div>
         <div class="field">
           <label>{{ t('qt.to') }}</label>
-          <WarehouseSelect v-model="form.to" :options="warehouseOptions" :placeholder="t('qt.to')" />
+          <SearchSelect :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" v-model="form.to" :options="warehouseOptions" :placeholder="t('qt.to')" />
         </div>
       </div>
 
@@ -107,13 +107,13 @@ async function submit() {
         <div class="qty-box" style="width: fit-content">
           <button @click="step(-1)">−</button>
           <input type="number" inputmode="decimal" v-model.number="form.qty" style="width: 80px" />
-          <button @click="step(1)">＋</button>
+          <button @click="step(1)"><Icon name="plus" /></button>
         </div>
       </div>
     </div>
 
     <button class="btn brand block mt16" :disabled="saving" @click="submit">
-      🔁 {{ saving ? '…' : t('qt.submit') }}
+      <Icon name="transfer" /> {{ saving ? '…' : t('qt.submit') }}
     </button>
 
     <ItemPickerSheet v-if="showPicker" :warehouse="form.from" @pick="pick" @close="showPicker = false" />

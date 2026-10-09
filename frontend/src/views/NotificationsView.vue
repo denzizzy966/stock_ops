@@ -32,11 +32,11 @@ function open(n) {
   <div class="content">
     <div v-if="items.length" class="row between" style="margin-bottom: 8px">
       <span class="small muted">{{ items.length }}</span>
-      <button class="btn sm" @click="app.markNotificationsRead()">✓ {{ t('notif.markAll') }}</button>
+      <button class="btn sm" @click="app.markNotificationsRead()"><Icon name="check" /> {{ t('notif.markAll') }}</button>
     </div>
 
     <div v-if="!items.length" class="empty">
-      <div class="big">🔔</div>
+      <div class="big"><Icon name="bell" /></div>
       {{ t('notif.empty') }}
     </div>
 
@@ -47,7 +47,7 @@ function open(n) {
       :style="{ cursor: 'pointer', opacity: n.read ? 0.7 : 1 }"
       @click="open(n)"
     >
-      <span class="lead-icon" :style="{ background: n.read ? 'var(--muted)' : 'var(--brand)' }">🔔</span>
+      <span class="lead-icon" :style="{ background: n.read ? 'var(--muted)' : 'var(--brand)' }"><Icon name="bell" /></span>
       <div class="grow" style="min-width: 0">
         <div class="truncate" :style="{ fontWeight: n.read ? 500 : 800 }">{{ stripHtml(n.subject) }}</div>
         <div class="tiny muted truncate">{{ n.from_user }} · {{ fmtDateTime(n.creation) }}</div>

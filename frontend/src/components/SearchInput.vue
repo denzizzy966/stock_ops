@@ -5,13 +5,13 @@ const emit = defineEmits(['update:modelValue'])
 
 <template>
   <div class="search">
-    <span class="search-ic">🔍</span>
+    <span class="search-ic"><Icon name="search" /></span>
     <input
       :value="modelValue"
       :placeholder="placeholder"
       inputmode="search"
       @input="emit('update:modelValue', $event.target.value)"
     />
-    <button v-if="modelValue" class="search-clear" @click="emit('update:modelValue', '')" aria-label="clear">✕</button>
+    <button v-if="modelValue" class="search-clear" @click="emit('update:modelValue', '')" aria-label="clear"><Icon name="close" /></button>
   </div>
 </template>

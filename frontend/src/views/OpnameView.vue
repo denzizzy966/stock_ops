@@ -89,13 +89,13 @@ function fmt(n) {
       <div v-if="whOptions.length > 1" class="chips wrap" style="margin-top: 10px">
         <button v-for="w in whOptions" :key="w" class="chip" :class="{ active: warehouse === w }" @click="selectWh(w)">{{ w }}</button>
       </div>
-      <div v-else class="tiny muted" style="margin-top: 8px">🏬 {{ warehouse }}</div>
+      <div v-else class="tiny muted" style="margin-top: 8px"><Icon name="warehouse" /> {{ warehouse }}</div>
     </FilterBar>
 
     <div v-if="loading">
       <div class="card" v-for="i in 4" :key="i" style="margin-top: 10px"><div class="skel skel-line" style="width: 55%"></div><div class="skel skel-line" style="width: 30%"></div></div>
     </div>
-    <div v-else-if="!rows.length" class="empty"><div class="big">📋</div>{{ t('opname.empty') }}</div>
+    <div v-else-if="!rows.length" class="empty"><div class="big"><Icon name="list" /></div>{{ t('opname.empty') }}</div>
 
     <div v-else class="card" style="padding: 4px 14px">
       <div v-for="r in filtered" :key="r.item_code" class="item-line">
@@ -122,7 +122,7 @@ function fmt(n) {
   <!-- bar submit melayang -->
   <div v-if="rows.length" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 10px); width: 100%; max-width: 520px; padding: 0 14px; z-index: 25">
     <button class="btn brand block" :disabled="saving || !changed.length" @click="submit" style="box-shadow: var(--shadow)">
-      ✅ {{ saving ? '…' : t('opname.submit') }} <span v-if="changed.length">· {{ changed.length }} {{ t('opname.count') }}</span>
+      <Icon name="check-circle" /> {{ saving ? '…' : t('opname.submit') }} <span v-if="changed.length">· {{ changed.length }} {{ t('opname.count') }}</span>
     </button>
   </div>
 </template>

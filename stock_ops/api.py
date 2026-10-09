@@ -2,6 +2,7 @@ import json
 
 import frappe
 from frappe import _
+from frappe.utils import cint
 
 ALLOWED_DOCTYPES = ("Material Request", "Stock Entry", "Purchase Receipt", "Quotation")
 
@@ -1256,6 +1257,62 @@ def apply_workflow_action(doctype, name, action, note=None):
 
 
 @frappe.whitelist()
+def get_server_doc(doctype, name):
+	"""Detail dokumen server untuk ditampilkan DI aplikasi (Daftar > Server), tanpa membuka Desk.
+
+	Lingkup sama dengan list_recent: perusahaan dalam lingkup user; staf (dibatasi, bukan manajer)
+	hanya dokumen miliknya atau yang ia setujui."""
+	if doctype not in ALLOWED_DOCTYPES:
+		frappe.throw(_("Doctype tidak diizinkan: {0}").format(doctype))
+	doc = frappe.get_doc(doctype, name)
+	_assert_company_allowed(doc.company)
+	user = frappe.session.user
+	if _allowed_companies() and not _is_manager() and user not in (doc.owner, doc.get("stock_ops_approver")):
+		frappe.throw(_("Anda tidak berwenang melihat dokumen ini."), frappe.PermissionError)
+
+	items = doc.get("items") or []
+	first = items[0] if items else frappe._dict()
+	if doctype == "Stock Entry":
+		src = doc.get("from_warehouse") or first.get("s_warehouse")
+		tgt = doc.get("to_warehouse") or first.get("t_warehouse")
+	elif doctype == "Material Request":
+		src = doc.get("set_from_warehouse") or first.get("from_warehouse")
+		tgt = doc.get("set_warehouse") or first.get("warehouse")
+	else:
+		src, tgt = None, doc.get("set_warehouse") or first.get("warehouse")
+	state = doc.get("workflow_state")
+	return {
+		"doctype": doctype,
+		"name": doc.name,
+		"docstatus": doc.docstatus,
+		"workflow_state": state,
+		"approval_note": doc.get("stock_ops_approval_note") if state == "Rejected" else None,
+		"company": doc.company,
+		"date": str(doc.get("posting_date") or doc.get("transaction_date") or ""),
+		"subtype": doc.get("stock_entry_type") or doc.get("material_request_type"),
+		"is_return": cint(doc.get("is_return")),
+		"source_warehouse": src,
+		"target_warehouse": tgt,
+		"supplier": doc.get("supplier"),
+		"customer": doc.get("party_name"),
+		"purpose": doc.get("stock_ops_purpose"),
+		"remarks": doc.get("remarks"),
+		"owner": doc.owner,
+		"approver": doc.get("stock_ops_approver"),
+		"items": [
+			{
+				"item_code": i.item_code,
+				"item_name": i.get("item_name"),
+				"qty": i.get("qty"),
+				"uom": i.get("uom") or i.get("stock_uom"),
+				"rejected_qty": i.get("rejected_qty"),
+			}
+			for i in items
+		],
+	}
+
+
+@frappe.whitelist()
 def get_doc_state(doctype, name):
 	"""Status terkini dokumen dari server (untuk refresh tampilan lokal): docstatus + workflow_state."""
 	if doctype not in ALLOWED_DOCTYPES:
@@ -1437,7 +1494,7 @@ def list_recent(company=None, limit=20):
 	for d in frappe.get_all(
 		"Purchase Receipt",
 		filters=dict(base),
-		fields=["name", "supplier as subtype", "posting_date as date", "status", "docstatus", "modified"],
+		fields=["name", "supplier as subtype", "is_return", "posting_date as date", "status", "docstatus", "modified"],
 		order_by="modified desc",
 		limit_page_length=limit,
 	):

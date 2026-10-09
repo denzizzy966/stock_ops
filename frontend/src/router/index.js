@@ -36,6 +36,7 @@ const routes = [
   { path: '/return', name: 'return', component: () => import('../views/ReturnFormView.vue') },
   { path: '/approvals', name: 'approvals', component: () => import('../views/ApprovalsView.vue'), meta: { tab: 'home' } },
   { path: '/doc/:localId', name: 'detail', component: () => import('../views/DocDetailView.vue') },
+  { path: '/sdoc/:doctype/:name', name: 'server-doc', component: () => import('../views/ServerDocView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 

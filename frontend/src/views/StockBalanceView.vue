@@ -72,7 +72,7 @@ function fmt(n) {
       <template #bar>
         <div class="row" style="gap: 8px">
           <SearchInput v-model="q" :placeholder="t('balance.search')" class="grow" />
-          <button class="btn sm" :disabled="loading" @click="load">🔄</button>
+          <button class="btn sm" :disabled="loading" @click="load"><Icon name="refresh" /></button>
         </div>
       </template>
       <div v-if="warehouses.length > 1" class="chips wrap" style="margin-top: 10px">
@@ -81,7 +81,7 @@ function fmt(n) {
       </div>
     </FilterBar>
 
-    <div v-if="restricted" class="tiny muted" style="margin: 6px 4px">🔒 {{ t('balance.restricted') }}: {{ warehouses.join(', ') }}</div>
+    <div v-if="restricted" class="tiny muted" style="margin: 6px 4px"><Icon name="lock" /> {{ t('balance.restricted') }}: {{ warehouses.join(', ') }}</div>
 
     <div v-if="loading">
       <div class="card" v-for="i in 4" :key="i" style="margin-top: 10px">
@@ -89,11 +89,11 @@ function fmt(n) {
         <div class="skel skel-line" style="width: 30%"></div>
       </div>
     </div>
-    <div v-else-if="!grouped.length" class="empty"><div class="big">📦</div>{{ t('balance.empty') }}</div>
+    <div v-else-if="!grouped.length" class="empty"><div class="big"><Icon name="box" /></div>{{ t('balance.empty') }}</div>
 
     <template v-else>
       <div v-for="g in grouped" :key="g.warehouse">
-        <div class="section-title">🏬 {{ g.warehouse }} · {{ g.items.length }} {{ t('balance.items') }}</div>
+        <div class="section-title"><Icon name="warehouse" /> {{ g.warehouse }} · {{ g.items.length }} {{ t('balance.items') }}</div>
         <div class="card" style="padding: 4px 14px">
           <div
             v-for="b in g.items"

@@ -81,7 +81,7 @@ function dt(e) {
       <div class="filter-dates" style="margin-top: 10px">
         <label class="date-field"><span>{{ t('movement.from') }}</span><input type="date" v-model="fromDate" /></label>
         <label class="date-field"><span>{{ t('movement.to') }}</span><input type="date" v-model="toDate" /></label>
-        <button v-if="fromDate || toDate" class="btn sm" style="align-self: flex-end" @click="clearDates">✕</button>
+        <button v-if="fromDate || toDate" class="btn sm" style="align-self: flex-end" @click="clearDates"><Icon name="close" /></button>
       </div>
       <div v-if="warehouses.length > 1" class="chips wrap" style="margin-top: 10px">
         <button class="chip" :class="{ active: whFilter === 'ALL' }" @click="whFilter = 'ALL'">{{ t('balance.allWh') }}</button>
@@ -89,7 +89,7 @@ function dt(e) {
       </div>
     </FilterBar>
 
-    <div v-if="restricted" class="tiny muted" style="margin: 6px 4px">🔒 {{ t('balance.restricted') }}: {{ warehouses.join(', ') }}</div>
+    <div v-if="restricted" class="tiny muted" style="margin: 6px 4px"><Icon name="lock" /> {{ t('balance.restricted') }}: {{ warehouses.join(', ') }}</div>
 
     <div v-if="loading">
       <div class="card" v-for="i in 4" :key="i" style="margin-top: 10px">
@@ -97,7 +97,7 @@ function dt(e) {
         <div class="skel skel-line" style="width: 35%"></div>
       </div>
     </div>
-    <div v-else-if="!filtered.length" class="empty"><div class="big">📈</div>{{ t('movement.empty') }}</div>
+    <div v-else-if="!filtered.length" class="empty"><div class="big"><Icon name="movement" /></div>{{ t('movement.empty') }}</div>
 
     <div v-else class="card" style="margin-top: 8px; padding: 4px 14px">
       <div v-for="e in filtered" :key="e.name" class="move-row">
@@ -107,7 +107,7 @@ function dt(e) {
             <span class="move-badge">{{ e.voucher_type }}</span>
             {{ e.voucher_no }} · {{ dt(e) }}
           </div>
-          <div class="tiny muted truncate">🏬 {{ e.warehouse }}</div>
+          <div class="tiny muted truncate"><Icon name="warehouse" /> {{ e.warehouse }}</div>
         </div>
         <div style="text-align: right">
           <div class="move-qty" :class="e.actual_qty >= 0 ? 'in' : 'out'">

@@ -74,22 +74,22 @@ function initials() {
             {{ t('item.barcode') }}<br /><b>{{ data.barcodes.join(', ') }}</b>
           </div>
         </div>
-        <div v-if="data.restricted" class="tiny muted mt8">🔒 {{ t('balance.restricted') }}: {{ data.warehouses.join(', ') }}</div>
+        <div v-if="data.restricted" class="tiny muted mt8"><Icon name="lock" /> {{ t('balance.restricted') }}: {{ data.warehouses.join(', ') }}</div>
       </div>
 
       <!-- Aksi cepat (ikut Stock Ops Settings) -->
       <div v-if="master.menuOn('se_in') || master.menuOn('se_out') || master.menuOn('transfer')" style="display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-top: 12px">
-        <button v-if="master.menuOn('se_in')" class="btn" style="background: #16a34a; color: #fff; flex-direction: column; gap: 2px; padding: 12px 6px; font-size: 12px" @click="quick('SE_IN')">📥<span>{{ t('item.stockIn') }}</span></button>
-        <button v-if="master.menuOn('se_out')" class="btn" style="background: #dc2626; color: #fff; flex-direction: column; gap: 2px; padding: 12px 6px; font-size: 12px" @click="quick('SE_OUT')">📤<span>{{ t('item.stockOut') }}</span></button>
-        <button v-if="master.menuOn('transfer')" class="btn" style="background: #ea580c; color: #fff; flex-direction: column; gap: 2px; padding: 12px 6px; font-size: 12px" @click="quick('SE_TRANSFER')">🔁<span>{{ t('item.transfer') }}</span></button>
+        <button v-if="master.menuOn('se_in')" class="btn" style="background: #16a34a; color: #fff; flex-direction: column; gap: 2px; padding: 12px 6px; font-size: 12px" @click="quick('SE_IN')"><Icon name="stock-in" /><span>{{ t('item.stockIn') }}</span></button>
+        <button v-if="master.menuOn('se_out')" class="btn" style="background: #dc2626; color: #fff; flex-direction: column; gap: 2px; padding: 12px 6px; font-size: 12px" @click="quick('SE_OUT')"><Icon name="stock-out" /><span>{{ t('item.stockOut') }}</span></button>
+        <button v-if="master.menuOn('transfer')" class="btn" style="background: #ea580c; color: #fff; flex-direction: column; gap: 2px; padding: 12px 6px; font-size: 12px" @click="quick('SE_TRANSFER')"><Icon name="transfer" /><span>{{ t('item.transfer') }}</span></button>
       </div>
 
       <!-- Stok per gudang -->
       <div class="section-title">{{ t('item.perWarehouse') }}</div>
-      <div v-if="!data.stock.length" class="empty" style="padding: 24px"><div class="big">📦</div>{{ t('item.noStock') }}</div>
+      <div v-if="!data.stock.length" class="empty" style="padding: 24px"><div class="big"><Icon name="box" /></div>{{ t('item.noStock') }}</div>
       <div v-else class="card" style="padding: 4px 14px">
         <div v-for="b in data.stock" :key="b.warehouse" class="item-line">
-          <div class="grow truncate">🏬 {{ b.warehouse }}</div>
+          <div class="grow truncate"><Icon name="warehouse" /> {{ b.warehouse }}</div>
           <div style="text-align: right">
             <div style="font-weight: 800">{{ fmt(b.actual_qty) }} <span class="tiny muted">{{ data.uom }}</span></div>
             <div v-if="b.reserved_qty" class="tiny muted">{{ t('balance.reserved') }} {{ fmt(b.reserved_qty) }}</div>
@@ -99,12 +99,12 @@ function initials() {
 
       <!-- Mutasi terakhir -->
       <div class="section-title">{{ t('item.movements') }}</div>
-      <div v-if="!data.movements.length" class="empty" style="padding: 24px"><div class="big">📈</div>{{ t('movement.empty') }}</div>
+      <div v-if="!data.movements.length" class="empty" style="padding: 24px"><div class="big"><Icon name="movement" /></div>{{ t('movement.empty') }}</div>
       <div v-else class="card" style="padding: 4px 14px">
         <div v-for="(m, i) in data.movements" :key="i" class="move-row">
           <div class="grow" style="min-width: 0">
             <div class="tiny muted truncate"><span class="move-badge">{{ m.voucher_type }}</span> {{ m.voucher_no }}</div>
-            <div class="tiny muted truncate">🏬 {{ m.warehouse }} · {{ dt(m) }}</div>
+            <div class="tiny muted truncate"><Icon name="warehouse" /> {{ m.warehouse }} · {{ dt(m) }}</div>
           </div>
           <div style="text-align: right">
             <div class="move-qty" :class="m.actual_qty >= 0 ? 'in' : 'out'">{{ m.actual_qty >= 0 ? '+' : '' }}{{ fmt(m.actual_qty) }}</div>

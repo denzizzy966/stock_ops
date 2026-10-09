@@ -154,16 +154,16 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
     </div>
     <div v-if="rows.length" class="row" style="gap: 8px; margin-bottom: 8px">
       <SearchInput v-model="q" :placeholder="t('approval.search')" class="grow" />
-      <button class="btn sm" :disabled="loading" @click="load">🔄</button>
+      <button class="btn sm" :disabled="loading" @click="load"><Icon name="refresh" /></button>
     </div>
     <div v-if="companies.length > 1" class="chips" style="margin-bottom: 8px">
       <button class="chip" :class="{ active: companyFilter === 'ALL' }" @click="companyFilter = 'ALL'">{{ t('common.all') }}</button>
       <button v-for="c in companies" :key="c" class="chip" :class="{ active: companyFilter === c }" @click="companyFilter = c">{{ c }}</button>
     </div>
 
-    <div v-if="loading" class="empty"><div class="big">⏳</div>{{ t('common.loading') }}</div>
-    <div v-else-if="!rows.length" class="empty"><div class="big">✅</div>{{ t('approval.none') }}</div>
-    <div v-else-if="!filtered.length" class="empty"><div class="big">🔎</div>{{ t('list.empty') }}</div>
+    <div v-if="loading" class="empty"><div class="big"><Icon name="loading" spin /></div>{{ t('common.loading') }}</div>
+    <div v-else-if="!rows.length" class="empty"><div class="big"><Icon name="check-circle" /></div>{{ t('approval.none') }}</div>
+    <div v-else-if="!filtered.length" class="empty"><div class="big"><Icon name="search" /></div>{{ t('list.empty') }}</div>
 
     <div
       v-for="row in filtered"
@@ -172,7 +172,7 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
       style="cursor: pointer"
       @click="openDetail(row)"
     >
-      <span class="lead-icon" style="background: #b45309">📝</span>
+      <span class="lead-icon" style="background: #b45309"><Icon name="note" /></span>
       <div class="grow" style="min-width: 0">
         <div class="truncate" style="font-weight: 700">{{ row.name }}</div>
         <div class="tiny muted truncate">{{ row.material_request_type }} · {{ row.owner }} · {{ row.item_count }} {{ t('common.items') }} · {{ row.transaction_date }}</div>
@@ -182,7 +182,7 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
     </div>
 
     <Sheet v-if="open" :title="t('approval.reviewTitle')" @close="open = false">
-      <div v-if="loadingDetail" class="empty"><div class="big">⏳</div>{{ t('common.loading') }}</div>
+      <div v-if="loadingDetail" class="empty"><div class="big"><Icon name="loading" spin /></div>{{ t('common.loading') }}</div>
       <template v-else-if="detail">
         <div class="card">
           <div style="font-weight: 800">{{ detail.name }}</div>

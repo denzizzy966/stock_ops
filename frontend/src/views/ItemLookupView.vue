@@ -58,14 +58,14 @@ async function onDetected(code) {
     <div class="toolbar">
       <div class="row" style="gap: 8px">
         <SearchInput v-model="q" :placeholder="t('lookup.search')" class="grow" />
-        <button class="btn brand" style="padding: 12px 14px" @click="showScanner = true" :title="t('scan.title')">📷</button>
+        <button class="btn brand" style="padding: 12px 14px" @click="showScanner = true" :title="t('scan.title')"><Icon name="camera" /></button>
       </div>
     </div>
 
     <div v-if="!results.length" class="empty">
-      <div class="big">🔎</div>
+      <div class="big"><Icon name="search" /></div>
       {{ t('lookup.empty') }}
-      <div class="tiny muted mt8">{{ t('lookup.scanHint') }} 📷</div>
+      <div class="tiny muted mt8">{{ t('lookup.scanHint') }} <Icon name="camera" /></div>
     </div>
 
     <div

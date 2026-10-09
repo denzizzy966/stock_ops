@@ -29,7 +29,7 @@ function goBack() {
     </div>
 
     <button v-if="bell" class="bell-btn" @click="router.push('/notifications')" aria-label="notifications">
-      🔔
+      <Icon name="bell" />
       <span v-if="bellCount" class="bell-badge">{{ bellCount > 99 ? '99+' : bellCount }}</span>
     </button>
 

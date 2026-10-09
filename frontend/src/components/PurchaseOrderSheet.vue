@@ -32,14 +32,14 @@ onMounted(load)
   <Sheet :title="t('po.title')" @close="emit('close')">
     <div class="row" style="gap: 8px; margin-bottom: 12px">
       <SearchInput v-model="q" :placeholder="t('po.searchPlaceholder')" class="grow" @keyup.enter="load" />
-      <button class="btn brand" style="padding: 12px 14px" @click="load">🔎</button>
+      <button class="btn brand" style="padding: 12px 14px" @click="load"><Icon name="search" /></button>
     </div>
 
-    <div v-if="loading" class="empty"><div class="big">⏳</div>{{ t('common.loading') }}</div>
-    <div v-else-if="!pos.length" class="empty"><div class="big">📭</div>{{ t('po.none') }}</div>
+    <div v-if="loading" class="empty"><div class="big"><Icon name="loading" spin /></div>{{ t('common.loading') }}</div>
+    <div v-else-if="!pos.length" class="empty"><div class="big"><Icon name="inbox" /></div>{{ t('po.none') }}</div>
 
     <div v-for="po in pos" :key="po.name" class="list-item" style="cursor: pointer" @click="emit('pick', po)">
-      <span class="lead-icon" style="background: #0891b2">🧾</span>
+      <span class="lead-icon" style="background: #0891b2"><Icon name="receipt" /></span>
       <div class="grow" style="min-width: 0">
         <div class="truncate" style="font-weight: 600">{{ po.name }}</div>
         <div class="tiny muted truncate">{{ po.supplier_name || po.supplier }} · {{ po.transaction_date }} · {{ po.status }}</div>

@@ -21,12 +21,12 @@ const recent = computed(() => docs.sorted.slice(0, 4))
 
 // Menu peluncur (semua tile identik → pasti seragam). `key` = flag Stock Ops Settings.
 const menuAll = [
-  { icon: '🔎', color: '#0ea5e9', label: 'home.menu.lookup', to: '/lookup', key: 'scan' },
-  { icon: '🏬', color: 'var(--brand)', label: 'home.menu.balance', to: '/balance', key: 'stock_balance' },
-  { icon: '📈', color: '#2563eb', label: 'home.menu.movement', to: '/movement', key: 'movement' },
-  { icon: '⚠️', color: 'var(--warn)', label: 'home.menu.low', to: '/low', key: 'low_stock' },
-  { icon: '🔁', color: '#ea580c', label: 'home.menu.transfer', to: '/quick-transfer', key: 'transfer' },
-  { icon: '📋', color: '#7c3aed', label: 'home.menu.opname', to: '/opname', key: 'opname' }
+  { icon: 'search', color: '#0ea5e9', label: 'home.menu.lookup', to: '/lookup', key: 'scan' },
+  { icon: 'warehouse', color: 'var(--brand)', label: 'home.menu.balance', to: '/balance', key: 'stock_balance' },
+  { icon: 'movement', color: '#2563eb', label: 'home.menu.movement', to: '/movement', key: 'movement' },
+  { icon: 'warning', color: 'var(--warn)', label: 'home.menu.low', to: '/low', key: 'low_stock' },
+  { icon: 'transfer', color: '#ea580c', label: 'home.menu.transfer', to: '/quick-transfer', key: 'transfer' },
+  { icon: 'list', color: '#7c3aed', label: 'home.menu.opname', to: '/opname', key: 'opname' }
 ]
 const menu = computed(() => menuAll.filter((m) => master.menuOn(m.key)))
 const createTypes = computed(() => DOC_TYPE_LIST.filter((ty) => master.menuOn(ty.key.toLowerCase())))
@@ -83,7 +83,7 @@ const dateStr = computed(() =>
 
     <!-- Alert stok menipis -->
     <button v-if="lowCount" class="alert-low mt12" @click="router.push('/low')">
-      <span class="al-ic">⚠️</span>
+      <span class="al-ic"><Icon name="warning" /></span>
       <span class="grow" style="text-align: left; min-width: 0">
         <span style="display: block; font-weight: 700">{{ t('home.lowAlert', { n: lowCount }) }}</span>
         <span class="tiny" style="opacity: 0.85">{{ t('home.lowAlertSub') }}</span>
@@ -96,11 +96,11 @@ const dateStr = computed(() =>
       <div class="section-title">{{ t('home.menuTitle') }}</div>
       <div class="launch-grid">
         <button v-for="m in menu" :key="m.to" class="launch-tile" @click="router.push(m.to)">
-          <span class="li" :style="{ background: m.color }">{{ m.icon }}</span>
+          <span class="li" :style="{ background: m.color }"><Icon :name="m.icon" /></span>
           <span class="lt">{{ t(m.label) }}</span>
         </button>
         <button v-if="master.isApprover" class="launch-tile" style="position: relative" @click="router.push('/approvals')">
-          <span class="li" style="background: #b45309">✅</span>
+          <span class="li" style="background: #b45309"><Icon name="check-circle" /></span>
           <span class="lt">{{ t('approval.menu') }}</span>
           <span
             v-if="master.pendingApprovals"
@@ -121,7 +121,8 @@ const dateStr = computed(() =>
           :style="{ background: ty.color }"
           @click="router.push(`/form/${ty.key}`)"
         >
-          {{ t('docType.' + ty.key) }}
+          <Icon :name="ty.icon" class="qt-ic" />
+          <span class="qt-lbl">{{ t('docType.' + ty.key) }}</span>
         </button>
       </div>
     </template>
@@ -134,7 +135,7 @@ const dateStr = computed(() =>
       </div>
 
       <div v-if="!recent.length" class="empty">
-        <div class="big">📦</div>
+        <div class="big"><Icon name="box" /></div>
         {{ t('home.emptyDocs') }}
       </div>
 
@@ -145,7 +146,7 @@ const dateStr = computed(() =>
         @click="router.push(`/doc/${d.localId}`)"
         style="cursor: pointer"
       >
-        <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }">{{ DOC_TYPES[d.type].icon }}</span>
+        <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }"><Icon :name="DOC_TYPES[d.type].icon" /></span>
         <div class="grow">
           <div class="truncate" style="font-weight: 600">{{ d.remoteName || t('home.draftLocal') }}</div>
           <div class="tiny muted">{{ t('docType.' + d.type) }} · {{ d.items.length }} {{ t('common.items') }} · {{ fmtDateTime(d.createdAt) }}</div>

@@ -6,10 +6,11 @@ import { useApp } from '../stores/app'
 import { useMaster } from '../stores/master'
 import { useI18n } from '../lib/i18n'
 import { listRecent } from '../lib/service'
-import { DOC_TYPES, DOC_TYPE_LIST } from '../data/mock'
+import { DOC_TYPES, DOC_TYPE_LIST, serverTypeKey as typeKeyOf } from '../data/mock'
 import AppBar from '../components/AppBar.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import FilterBar from '../components/FilterBar.vue'
+import SearchSelect from '../components/SearchSelect.vue'
 import { fmtDateTime } from '../lib/util'
 
 const docs = useDocs()
@@ -60,11 +61,6 @@ watch(scope, (s) => {
   if (s === 'server' && !serverDocs.value.length) loadServer()
 })
 
-// Petakan dokumen server → jenis app (untuk ikon/warna/label)
-function typeKeyOf(d) {
-  if (d.doctype === 'Material Request') return d.subtype === 'Purchase' ? 'PR' : 'MR'
-  return { 'Material Receipt': 'SE_IN', 'Material Issue': 'SE_OUT', 'Material Transfer': 'SE_TRANSFER' }[d.subtype] || 'SE_TRANSFER'
-}
 const docstatusClass = { 0: 's-pending', 1: 's-submitted', 2: 's-error' }
 function wfLabel(state) {
   const map = { 'Pending Approval': 'approval.pending', Approved: 'approval.approved', Rejected: 'approval.rejected' }
@@ -73,10 +69,13 @@ function wfLabel(state) {
 function wfClass(state) {
   return { pending: state === 'Pending Approval', approved: state === 'Approved', rejected: state === 'Rejected' }
 }
-// Buka dokumen server di Desk (tab baru) — hanya bila user punya akses/izin baca doctype.
-function openInErp(d) {
-  if (!master.canOpenInDesk(d.doctype)) return app.notify(t('common.noDeskPerm'), 'warn')
-  window.open(master.deskUrl(d.doctype, d.name), '_blank', 'noopener')
+// Klik dokumen server → buka DI APLIKASI. Bila dokumen ini juga ada di perangkat (dibuat dari HP
+// ini), buka detail lokal yang punya aksi (Submit / Ajukan / Buka Kembali); selain itu detail server.
+// Hanya ikon Desk yang membuka tab baru.
+function openDoc(d) {
+  const local = docs.docs.find((x) => x.remoteName === d.name && x.doctype === d.doctype)
+  if (local) router.push(`/doc/${local.localId}`)
+  else router.push(`/sdoc/${encodeURIComponent(d.doctype)}/${encodeURIComponent(d.name)}`)
 }
 </script>
 
@@ -94,7 +93,7 @@ function openInErp(d) {
         <div class="chips" style="margin-top: 10px">
           <button class="chip" :class="{ active: filterType === 'ALL' }" @click="filterType = 'ALL'">{{ t('common.all') }}</button>
           <button v-for="ty in DOC_TYPE_LIST" :key="ty.key" class="chip" :class="{ active: filterType === ty.key }" @click="filterType = ty.key">
-            {{ ty.icon }} {{ ty.short }}
+            <Icon :name="ty.icon" /> {{ ty.short }}
           </button>
         </div>
         <div class="chips" style="margin-top: 8px">
@@ -107,10 +106,10 @@ function openInErp(d) {
 
     <!-- ===== LOKAL ===== -->
     <template v-if="scope === 'local'">
-      <div v-if="!localList.length" class="empty"><div class="big">📋</div>{{ t('list.empty') }}</div>
+      <div v-if="!localList.length" class="empty"><div class="big"><Icon name="list" /></div>{{ t('list.empty') }}</div>
 
       <div v-for="d in localList" :key="d.localId" class="list-item mt12" style="cursor: pointer" @click="router.push(`/doc/${d.localId}`)">
-        <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }">{{ DOC_TYPES[d.type].icon }}</span>
+        <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }"><Icon :name="DOC_TYPES[d.type].icon" /></span>
         <div class="grow" style="min-width: 0">
           <div class="row between">
             <div class="truncate" style="font-weight: 700">{{ d.remoteName || t('home.draftLocal') }}</div>
@@ -127,29 +126,24 @@ function openInErp(d) {
           class="desk-icon"
           :title="t('common.openInDesk')"
           @click.stop
-        >🖥️</a>
+        ><Icon name="external" /></a>
       </div>
     </template>
 
     <!-- ===== SERVER ===== -->
     <template v-else>
       <div class="row between" style="margin: 2px 4px 8px; gap: 8px; align-items: center">
-        <select
-          v-if="!companyLocked && master.companyNames.length > 1"
-          v-model="listCompany"
-          class="company-select"
-          :aria-label="t('form.company')"
-        >
-          <option v-for="c in master.companyNames" :key="c" :value="c">{{ c }}</option>
-        </select>
+        <div v-if="!companyLocked && master.companyNames.length > 1" class="grow company-pick">
+          <SearchSelect v-model="listCompany" :options="master.companyNames" :placeholder="t('form.company')" />
+        </div>
         <span v-else class="tiny muted truncate">{{ listCompany }}</span>
-        <button class="btn sm" :disabled="loadingServer" @click="loadServer">🔄</button>
+        <button class="btn sm" :disabled="loadingServer" @click="loadServer"><Icon name="refresh" /></button>
       </div>
-      <div v-if="loadingServer" class="empty"><div class="big">⏳</div>…</div>
-      <div v-else-if="!serverDocs.length" class="empty"><div class="big">📋</div>{{ t('list.empty') }}</div>
-      <div v-for="d in serverDocs" :key="d.name" class="list-item mt12" style="cursor: pointer" @click="openInErp(d)">
-        <span class="lead-icon" :style="{ background: DOC_TYPES[typeKeyOf(d)].color }">{{ DOC_TYPES[typeKeyOf(d)].icon }}</span>
-        <div class="grow">
+      <div v-if="loadingServer" class="empty"><div class="big"><Icon name="loading" spin /></div>…</div>
+      <div v-else-if="!serverDocs.length" class="empty"><div class="big"><Icon name="list" /></div>{{ t('list.empty') }}</div>
+      <div v-for="d in serverDocs" :key="d.name" class="list-item mt12" style="cursor: pointer" @click="openDoc(d)">
+        <span class="lead-icon" :style="{ background: DOC_TYPES[typeKeyOf(d)].color }"><Icon :name="DOC_TYPES[typeKeyOf(d)].icon" /></span>
+        <div class="grow" style="min-width: 0">
           <div class="row between">
             <div class="truncate" style="font-weight: 700">{{ d.name }}</div>
             <span class="badge-status" :class="docstatusClass[d.docstatus]">{{ t('status.' + d.docstatus) }}</span>
@@ -158,8 +152,16 @@ function openInErp(d) {
             {{ t('docType.' + typeKeyOf(d)) }} · {{ d.date }}
             <span v-if="d.workflow_state && d.workflow_state !== 'Approved'" class="wf-mini" :class="wfClass(d.workflow_state)">{{ wfLabel(d.workflow_state) }}</span>
           </div>
-          <div v-if="master.canOpenInDesk(d.doctype)" class="tiny muted truncate">🖥️ {{ t('common.openInDesk') }} ↗</div>
         </div>
+        <a
+          v-if="master.canOpenInDesk(d.doctype)"
+          :href="master.deskUrl(d.doctype, d.name)"
+          target="_blank"
+          rel="noopener"
+          class="desk-icon"
+          :title="t('common.openInDesk')"
+          @click.stop
+        ><Icon name="external" /></a>
       </div>
     </template>
   </div>
@@ -172,10 +174,7 @@ function openInErp(d) {
 .wf-mini.pending { background: #fef3c7; color: #92400e; }
 .wf-mini.rejected { background: #fee2e2; color: #991b1b; }
 .wf-mini.approved { background: #dcfce7; color: #166534; }
-.company-select {
-  flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--input-bg); color: var(--ink);
-  border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 600;
-}
+.company-pick { min-width: 0; }
 .desk-icon {
   flex: none; align-self: center; text-decoration: none; font-size: 16px; line-height: 1;
   padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; margin-left: 4px;

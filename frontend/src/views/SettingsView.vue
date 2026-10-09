@@ -7,6 +7,7 @@ import { useI18n, LANGS } from '../lib/i18n'
 import { useMaster } from '../stores/master'
 import { pushSupported, isSubscribed, enablePush, disablePush, sendTest } from '../lib/push'
 import AppBar from '../components/AppBar.vue'
+import SearchSelect from '../components/SearchSelect.vue'
 
 const app = useApp()
 const docs = useDocs()
@@ -138,7 +139,7 @@ function clearData() {
   <div class="content">
     <div class="card">
       <div class="row">
-        <span class="lead-icon" style="background: var(--brand)">👤</span>
+        <span class="lead-icon" style="background: var(--brand)"><Icon name="user" /></span>
         <div class="grow" style="min-width: 0">
           <div class="truncate" style="font-weight: 700">{{ master.employee?.employee_name || app.user?.name }}</div>
           <div class="tiny muted truncate">{{ app.user?.email }}</div>
@@ -155,7 +156,7 @@ function clearData() {
     <!-- Sync / Outbox dipindah ke sini -->
     <div class="section-title">{{ t('settings.syncOutbox') }}</div>
     <button class="list-item" style="width: 100%; text-align: left; border: 0; cursor: pointer" @click="router.push('/sync')">
-      <span class="lead-icon" style="background: var(--brand)">🔄</span>
+      <span class="lead-icon" style="background: var(--brand)"><Icon name="refresh" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('settings.syncOutbox') }}</div>
         <div class="tiny muted">{{ t('settings.syncOutboxDesc') }}</div>
@@ -165,7 +166,7 @@ function clearData() {
     </button>
 
     <button class="list-item" style="width: 100%; text-align: left; border: 0; cursor: pointer; margin-top: 10px" @click="router.push('/reports')">
-      <span class="lead-icon" style="background: var(--brand)">📊</span>
+      <span class="lead-icon" style="background: var(--brand)"><Icon name="report" /></span>
       <div class="grow">
         <div style="font-weight: 700">{{ t('settings.reports') }}</div>
         <div class="tiny muted">{{ t('settings.reportsDesc') }}</div>
@@ -203,7 +204,7 @@ function clearData() {
             @click="setDesign(d.v)"
           >
             <span>{{ d.label }}</span>
-            <span v-if="form.design === d.v">✓</span>
+            <span v-if="form.design === d.v"><Icon name="check" /></span>
           </button>
         </div>
       </div>
@@ -218,15 +219,15 @@ function clearData() {
             <input type="text" :value="serverCompany" readonly disabled />
             <div class="tiny muted" style="margin-top: 4px">{{ t('form.companyFromAccount') }}</div>
           </template>
-          <select v-else v-model="form.company"><option v-for="c in COMPANIES" :key="c">{{ c }}</option></select>
+          <SearchSelect v-else v-model="form.company" :options="COMPANIES" :placeholder="t('settings.companyDefault')" />
         </div>
         <div class="field">
           <label>{{ t('settings.srcDefault') }}</label>
-          <select v-model="form.defaultSourceWarehouse"><option v-for="w in WAREHOUSES" :key="w">{{ w }}</option></select>
+          <SearchSelect v-model="form.defaultSourceWarehouse" :options="WAREHOUSES" :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" :placeholder="t('settings.srcDefault')" />
         </div>
         <div class="field" style="margin: 0">
           <label>{{ t('settings.tgtDefault') }}</label>
-          <select v-model="form.defaultTargetWarehouse"><option v-for="w in WAREHOUSES" :key="w">{{ w }}</option></select>
+          <SearchSelect v-model="form.defaultTargetWarehouse" :options="WAREHOUSES" :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" :placeholder="t('settings.tgtDefault')" />
         </div>
       </div>
     </template>
@@ -241,7 +242,7 @@ function clearData() {
             <span class="slider"></span>
           </label>
         </div>
-        <button v-if="notifOn" class="btn sm mt12" @click="testNotif">🔔 {{ t('settings.testNotif') }}</button>
+        <button v-if="notifOn" class="btn sm mt12" @click="testNotif"><Icon name="bell" /> {{ t('settings.testNotif') }}</button>
       </div>
     </template>
 
@@ -265,7 +266,7 @@ function clearData() {
     <div class="section-title">{{ t('settings.getApp') }}</div>
     <div class="card">
       <button v-if="master.flutterApkUrl" class="list-item" style="width: 100%; text-align: left; border: 0; cursor: pointer" @click="downloadApk">
-        <span class="lead-icon" style="background: #16a34a">⬇️</span>
+        <span class="lead-icon" style="background: #16a34a"><Icon name="download" /></span>
         <div class="grow">
           <div style="font-weight: 700">{{ t('settings.downloadApk') }}</div>
           <div class="tiny muted">{{ t('settings.downloadApkDesc') }}</div>
@@ -274,7 +275,7 @@ function clearData() {
       </button>
       <hr v-if="master.flutterApkUrl" style="border: 0; border-top: 1px solid var(--line); margin: 10px 0" />
       <button class="list-item" style="width: 100%; text-align: left; border: 0; cursor: pointer" @click="installPwa">
-        <span class="lead-icon" style="background: var(--brand)">📲</span>
+        <span class="lead-icon" style="background: var(--brand)"><Icon name="install" /></span>
         <div class="grow">
           <div style="font-weight: 700">{{ t('settings.installPwa') }}</div>
           <div class="tiny muted">{{ t('settings.installPwaDesc') }}</div>

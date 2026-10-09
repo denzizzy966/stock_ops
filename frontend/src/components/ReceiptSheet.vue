@@ -33,14 +33,14 @@ onMounted(load)
   <Sheet :title="t('ret.pickTitle')" @close="emit('close')">
     <div class="row" style="gap: 8px; margin-bottom: 12px">
       <SearchInput v-model="q" :placeholder="t('ret.searchPlaceholder')" class="grow" @keyup.enter="load" />
-      <button class="btn brand" style="padding: 12px 14px" @click="load">🔎</button>
+      <button class="btn brand" style="padding: 12px 14px" @click="load"><Icon name="search" /></button>
     </div>
 
-    <div v-if="loading" class="empty"><div class="big">⏳</div>{{ t('common.loading') }}</div>
-    <div v-else-if="!receipts.length" class="empty"><div class="big">📭</div>{{ t('ret.none') }}</div>
+    <div v-if="loading" class="empty"><div class="big"><Icon name="loading" spin /></div>{{ t('common.loading') }}</div>
+    <div v-else-if="!receipts.length" class="empty"><div class="big"><Icon name="inbox" /></div>{{ t('ret.none') }}</div>
 
     <div v-for="r in receipts" :key="r.name" class="list-item" style="cursor: pointer" @click="emit('pick', r)">
-      <span class="lead-icon" style="background: #b45309">📦</span>
+      <span class="lead-icon" style="background: #b45309"><Icon name="box" /></span>
       <div class="grow" style="min-width: 0">
         <div class="truncate" style="font-weight: 600">{{ r.name }}</div>
         <div class="tiny muted truncate">

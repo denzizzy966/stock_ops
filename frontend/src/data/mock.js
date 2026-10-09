@@ -45,44 +45,44 @@ export const DOC_TYPES = {
   MR: {
     key: 'MR', short: 'MR', label: 'Material Request — Transfer',
     doctype: 'Material Request', meta: 'material_request_type=Material Transfer',
-    icon: '🔀', color: '#0b5cff', source: true, target: true
+    icon: 'request-transfer', color: '#0b5cff', source: true, target: true
   },
   PR: {
     key: 'PR', short: 'PR', label: 'Material Request — Purchase',
     doctype: 'Material Request', meta: 'material_request_type=Purchase',
-    icon: '🛒', color: '#7c3aed', source: false, target: true, supplier: true
+    icon: 'cart', color: '#7c3aed', source: false, target: true, supplier: true
   },
   SE_IN: {
     key: 'SE_IN', short: 'IN', label: 'Stock In — Material Receipt',
     doctype: 'Stock Entry', meta: 'stock_entry_type=Material Receipt',
-    icon: '📥', color: '#16a34a', source: false, target: true, onlineOnly: true
+    icon: 'stock-in', color: '#16a34a', source: false, target: true, onlineOnly: true
   },
   SE_OUT: {
     key: 'SE_OUT', short: 'OUT', label: 'Stock Out — Material Issue',
     doctype: 'Stock Entry', meta: 'stock_entry_type=Material Issue',
-    icon: '📤', color: '#dc2626', source: true, target: false, onlineOnly: true
+    icon: 'stock-out', color: '#dc2626', source: true, target: false, onlineOnly: true
   },
   SE_TRANSFER: {
     key: 'SE_TRANSFER', short: 'TRF', label: 'Stock Transfer — Material Transfer',
     doctype: 'Stock Entry', meta: 'stock_entry_type=Material Transfer',
-    icon: '🔁', color: '#ea580c', source: true, target: true, onlineOnly: true
+    icon: 'transfer', color: '#ea580c', source: true, target: true, onlineOnly: true
   },
   GRN: {
     key: 'GRN', short: 'GRN', label: 'Goods Receipt — Purchase Receipt',
     doctype: 'Purchase Receipt', meta: 'penerimaan barang dari supplier',
-    icon: '📦', color: '#0891b2', source: false, target: true, supplier: true, supplierRequired: true,
+    icon: 'receive', color: '#0891b2', source: false, target: true, supplier: true, supplierRequired: true,
     purchaseOrder: true, acceptReject: true, onlineOnly: true
   },
   RET: {
     key: 'RET', short: 'RET', label: 'Goods Return — Purchase Return',
     doctype: 'Purchase Receipt', meta: 'retur barang ke supplier',
-    icon: '↩️', color: '#b45309', source: false, target: false, supplier: true,
+    icon: 'return', color: '#b45309', source: false, target: false, supplier: true,
     isReturn: true, onlineOnly: true
   },
   QTN: {
     key: 'QTN', short: 'QTN', label: 'Quotation — Sales',
     doctype: 'Quotation', meta: 'permintaan barang penjualan (ditarik ke Sales Invoice)',
-    icon: '🧾', color: '#0d9488', source: false, target: false,
+    icon: 'quotation', color: '#0d9488', source: false, target: false,
     customer: true, isQuotation: true, onlineOnly: true
   }
 }
@@ -90,3 +90,11 @@ export const DOC_TYPES = {
 // Penerimaan Barang, & Retur wajib online (kunci stok/valuasi real-time) → onlineOnly.
 
 export const DOC_TYPE_LIST = Object.values(DOC_TYPES)
+
+// Petakan dokumen server (list_recent / get_server_doc) → jenis app (ikon/warna/label).
+export function serverTypeKey(d) {
+  if (d.doctype === 'Material Request') return d.subtype === 'Purchase' ? 'PR' : 'MR'
+  if (d.doctype === 'Purchase Receipt') return d.is_return ? 'RET' : 'GRN'
+  if (d.doctype === 'Quotation') return 'QTN'
+  return { 'Material Receipt': 'SE_IN', 'Material Issue': 'SE_OUT', 'Material Transfer': 'SE_TRANSFER' }[d.subtype] || 'SE_TRANSFER'
+}

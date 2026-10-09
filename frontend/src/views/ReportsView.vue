@@ -18,7 +18,7 @@ function rows(obj, map) {
   if (!obj) return []
   return Object.keys(obj).map((k) => {
     const key = map[k]
-    return { label: key ? t('docType.' + key) : k, color: key ? DOC_TYPES[key].color : '#888', icon: key ? DOC_TYPES[key].icon : '•', count: obj[k] }
+    return { label: key ? t('docType.' + key) : k, color: key ? DOC_TYPES[key].color : '#888', icon: key ? DOC_TYPES[key].icon : 'list', count: obj[k] }
   })
 }
 const mrRows = computed(() => rows(data.value && data.value.mr, MR_LABEL))
@@ -48,17 +48,17 @@ onMounted(load)
         <div style="font-weight: 700">{{ app.settings.company }}</div>
         <div class="tiny muted">{{ t('report.period') }}</div>
       </div>
-      <button class="btn sm" :disabled="loading" @click="load">🔄</button>
+      <button class="btn sm" :disabled="loading" @click="load"><Icon name="refresh" /></button>
     </div>
 
-    <div v-if="loading" class="empty"><div class="big">⏳</div>…</div>
-    <div v-else-if="empty" class="empty"><div class="big">📊</div>{{ t('report.none') }}</div>
+    <div v-if="loading" class="empty"><div class="big"><Icon name="loading" spin /></div>…</div>
+    <div v-else-if="empty" class="empty"><div class="big"><Icon name="report" /></div>{{ t('report.none') }}</div>
 
     <template v-else>
       <div class="section-title">{{ t('report.mrGroup') }} · {{ mrTotal }}</div>
       <div class="card" v-if="mrRows.length">
         <div v-for="(r, i) in mrRows" :key="i" class="item-line">
-          <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }">{{ r.icon }}</span>
+          <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }"><Icon :name="r.icon" /></span>
           <div class="grow truncate">{{ r.label }}</div>
           <div style="font-weight: 800; font-size: 18px">{{ r.count }}</div>
         </div>
@@ -67,7 +67,7 @@ onMounted(load)
       <div class="section-title">{{ t('report.seGroup') }} · {{ seTotal }}</div>
       <div class="card" v-if="seRows.length">
         <div v-for="(r, i) in seRows" :key="i" class="item-line">
-          <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }">{{ r.icon }}</span>
+          <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }"><Icon :name="r.icon" /></span>
           <div class="grow truncate">{{ r.label }}</div>
           <div style="font-weight: 800; font-size: 18px">{{ r.count }}</div>
         </div>

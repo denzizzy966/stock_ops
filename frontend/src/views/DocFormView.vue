@@ -10,7 +10,7 @@ import { getGeolocation } from '../lib/util'
 import AppBar from '../components/AppBar.vue'
 import ItemPickerSheet from '../components/ItemPickerSheet.vue'
 import PhotoUploader from '../components/PhotoUploader.vue'
-import WarehouseSelect from '../components/WarehouseSelect.vue'
+import SearchSelect from '../components/SearchSelect.vue'
 import PurchaseOrderSheet from '../components/PurchaseOrderSheet.vue'
 import { getPurchaseOrderItems } from '../lib/service'
 
@@ -48,6 +48,7 @@ watch(
 // Stock Out: Tujuan → cost center (Stock Ops Settings), disaring per perusahaan dokumen.
 const purposeOptions = computed(() => (master.issuePurposes || []).filter((p) => p.company === doc.company))
 const showPurpose = computed(() => cfg && cfg.key === 'SE_OUT' && purposeOptions.value.length > 0)
+const purposeNames = computed(() => purposeOptions.value.map((p) => p.purpose))
 const purposeCostCenter = computed(() => {
   const p = purposeOptions.value.find((o) => o.purpose === doc.purpose)
   return p ? p.cost_center : ''
@@ -109,7 +110,7 @@ async function captureLocation(silent = false) {
   locating.value = false
   if (g) {
     doc.geo = g
-    if (!silent) app.notify('📍 ' + g, 'success')
+    if (!silent) app.notify(g, 'success')
   } else if (!silent) {
     app.notify(t('form.locationOff'), 'warn')
   }
@@ -233,7 +234,7 @@ async function save() {
   <div class="content" v-if="cfg">
     <div class="card">
       <div class="row" style="gap: 10px; margin-bottom: 12px">
-        <span class="lead-icon" :style="{ background: cfg.color }">{{ cfg.icon }}</span>
+        <span class="lead-icon" :style="{ background: cfg.color }"><Icon :name="cfg.icon" /></span>
         <div class="grow">
           <div style="font-weight: 700">{{ t('docType.' + cfg.key) }}</div>
           <div class="tiny muted">{{ cfg.doctype }}</div>
@@ -242,9 +243,7 @@ async function save() {
 
       <div class="field">
         <label>{{ t('form.company') }}</label>
-        <select v-model="doc.company" :disabled="companyReadOnly">
-          <option v-for="c in COMPANIES" :key="c">{{ c }}</option>
-        </select>
+        <SearchSelect v-model="doc.company" :options="COMPANIES" :disabled="companyReadOnly" :placeholder="t('form.company')" />
         <div v-if="companyReadOnly" class="tiny muted" style="margin-top: 4px">{{ t('form.companyFromAccount') }}</div>
       </div>
 
@@ -256,7 +255,7 @@ async function save() {
       <div v-if="cfg.purchaseOrder" class="field">
         <label>{{ t('po.label') }} <span class="muted">({{ t('common.optional') }})</span></label>
         <div v-if="doc.purchaseOrder" class="row between" style="gap: 8px; align-items: center">
-          <span class="po-chip">🧾 {{ doc.purchaseOrder }}</span>
+          <span class="po-chip"><Icon name="receipt" /> {{ doc.purchaseOrder }}</span>
           <button class="btn sm" @click="clearPO">{{ t('common.clear') }}</button>
         </div>
         <button v-else class="btn block" :disabled="loadingPO" @click="showPO = true">
@@ -266,10 +265,7 @@ async function save() {
 
       <div v-if="cfg.supplier" class="field">
         <label>{{ t('form.supplier') }}<span v-if="!cfg.supplierRequired"> ({{ t('common.optional') }})</span></label>
-        <select v-model="doc.supplier" :disabled="!!doc.purchaseOrder">
-          <option value="">—</option>
-          <option v-for="s in SUPPLIERS" :key="s">{{ s }}</option>
-        </select>
+        <SearchSelect v-model="doc.supplier" :options="SUPPLIERS" :disabled="!!doc.purchaseOrder" clearable :placeholder="t('form.supplier')" />
       </div>
 
       <div v-if="cfg.customer" class="field">
@@ -284,41 +280,38 @@ async function save() {
       <div class="field-row">
         <div v-if="cfg.source" class="field">
           <label>{{ t('form.sourceWh') }}</label>
-          <WarehouseSelect v-model="doc.sourceWarehouse" :options="warehouseOptions" :placeholder="t('form.sourceWh')" />
+          <SearchSelect :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" v-model="doc.sourceWarehouse" :options="warehouseOptions" :placeholder="t('form.sourceWh')" />
         </div>
         <div v-if="cfg.target" class="field">
           <label>{{ cfg.acceptReject ? t('form.acceptedWh') : t('form.targetWh') }}</label>
-          <WarehouseSelect v-model="doc.targetWarehouse" :options="warehouseOptions" :placeholder="cfg.acceptReject ? t('form.acceptedWh') : t('form.targetWh')" />
+          <SearchSelect :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" v-model="doc.targetWarehouse" :options="warehouseOptions" :placeholder="cfg.acceptReject ? t('form.acceptedWh') : t('form.targetWh')" />
         </div>
       </div>
 
       <div v-if="showPurpose" class="field">
         <label>{{ t('form.purpose') }}<span v-if="!master.issuePurposeRequired"> ({{ t('common.optional') }})</span></label>
-        <select v-model="doc.purpose">
-          <option value="">—</option>
-          <option v-for="p in purposeOptions" :key="p.purpose" :value="p.purpose">{{ p.purpose }}</option>
-        </select>
+        <SearchSelect v-model="doc.purpose" :options="purposeNames" clearable :placeholder="t('form.purpose')" />
         <div v-if="purposeCostCenter" class="tiny muted" style="margin-top: 4px">{{ t('form.costCenter') }}: {{ purposeCostCenter }}</div>
       </div>
 
       <div v-if="cfg.acceptReject && hasRejected" class="field">
         <label>{{ t('form.rejectedWh') }}</label>
-        <WarehouseSelect v-model="doc.rejectedWarehouse" :options="warehouseOptions" :placeholder="t('form.rejectedWh')" />
+        <SearchSelect :search-placeholder="t('form.whSearch')" :empty-text="t('form.whEmpty')" v-model="doc.rejectedWarehouse" :options="warehouseOptions" :placeholder="t('form.rejectedWh')" />
       </div>
       <div v-if="cfg.acceptReject && hasAsset" class="field">
         <label>{{ t('form.assetLocation') }}</label>
-        <WarehouseSelect v-model="doc.assetLocation" :options="LOCATIONS" :placeholder="t('form.assetLocation')" />
+        <SearchSelect v-model="doc.assetLocation" :options="LOCATIONS" :placeholder="t('form.assetLocation')" />
       </div>
     </div>
 
     <div class="card mt12">
       <div class="row between">
         <div style="font-weight: 700">{{ t('common.items') }} ({{ doc.items.length }})</div>
-        <button class="btn brand sm" @click="showPicker = true">＋ {{ t('common.add') }}</button>
+        <button class="btn brand sm" @click="showPicker = true"><Icon name="plus" /> {{ t('common.add') }}</button>
       </div>
 
       <div v-if="!doc.items.length" class="empty" style="padding: 26px">
-        <div class="big">🧺</div>
+        <div class="big"><Icon name="basket" /></div>
         {{ t('form.noItems') }}
       </div>
 
@@ -337,15 +330,10 @@ async function save() {
           </div>
           <div class="uom-row">
             <span class="uom-lbl">{{ t('form.uom') }}</span>
-            <div class="uom-wrap">
-              <select class="uom-select" :value="line.uom" @change="setUom(line, $event.target.value)">
-                <option v-for="u in itemUoms(line)" :key="u.uom" :value="u.uom">{{ u.uom }}</option>
-              </select>
-              <span class="uom-caret">▾</span>
-            </div>
+            <SearchSelect compact :model-value="line.uom" :options="itemUoms(line).map((u) => u.uom)" @update:model-value="(v) => setUom(line, v)" />
           </div>
           <div v-if="isShort(line)" class="stock-warn">
-            {{ t('form.insufficientStock', { need: neededStockQty(line), avail: availableStock(line), uom: stockUomOf(line) }) }}
+            <Icon name="warning" /> {{ t('form.insufficientStock', { need: neededStockQty(line), avail: availableStock(line), uom: stockUomOf(line) }) }}
           </div>
           <div v-if="cfg.acceptReject" class="row" style="gap: 12px; margin-top: 8px; align-items: center">
             <label class="tiny muted" style="display: flex; align-items: center; gap: 5px">{{ t('form.accepted') }}
@@ -359,9 +347,9 @@ async function save() {
         <div v-if="!cfg.acceptReject" class="qty-box">
           <button @click="step(line, -1)">−</button>
           <input type="number" inputmode="decimal" v-model.number="line.qty" />
-          <button @click="step(line, 1)">＋</button>
+          <button @click="step(line, 1)"><Icon name="plus" /></button>
         </div>
-        <button class="btn sm danger" style="padding: 8px 10px; align-self: flex-start" @click="removeLine(line.item_code)">🗑</button>
+        <button class="btn sm danger" style="padding: 8px 10px; align-self: flex-start" @click="removeLine(line.item_code)"><Icon name="trash" /></button>
       </div>
 
       <div v-if="doc.items.length" class="row between mt12" style="font-weight: 700">
@@ -385,7 +373,7 @@ async function save() {
     <div class="card mt12">
       <div class="row between">
         <div style="min-width: 0">
-          <div style="font-weight: 700">📍 {{ t('form.location') }}</div>
+          <div style="font-weight: 700"><Icon name="location" /> {{ t('form.location') }}</div>
           <div v-if="doc.geo" class="tiny muted truncate">
             {{ doc.geo }} ·
             <a :href="`https://maps.google.com/?q=${doc.geo}`" target="_blank" style="color: var(--brand)">{{ t('form.viewMap') }}</a>
@@ -429,15 +417,6 @@ async function save() {
   display: flex; align-items: center; gap: 8px; margin-top: 8px;
 }
 .uom-lbl { font-size: 12px; color: var(--muted); font-weight: 600; }
-.uom-wrap { position: relative; display: inline-flex; align-items: center; }
-.uom-select {
-  appearance: none; -webkit-appearance: none;
-  border: 1px solid var(--brand); border-radius: 10px; background: var(--input-bg); color: var(--ink);
-  font-size: 15px; font-weight: 700; padding: 9px 30px 9px 14px; min-height: 42px; min-width: 96px;
-}
-.uom-caret {
-  position: absolute; right: 12px; color: var(--brand); font-size: 12px; pointer-events: none;
-}
 .stock-warn {
   margin-top: 7px; font-size: 12px; font-weight: 700; line-height: 1.35;
   color: #92400e; background: #fef3c7; border: 1px solid #fcd34d;

@@ -64,10 +64,10 @@ onBeforeUnmount(() => {
     <div class="photo-grid">
       <div v-for="p in modelValue" :key="p.id" class="ph">
         <img :src="urls[p.id]" alt="" />
-        <button class="x" @click="remove(p.id)">✕</button>
+        <button class="x" @click="remove(p.id)"><Icon name="close" /></button>
       </div>
       <button class="photo-add" @click="pick" :disabled="busy">
-        <span class="big">{{ busy ? '⏳' : '📷' }}</span>
+        <span class="big"><Icon :name="busy ? 'loading' : 'camera'" :spin="busy" /></span>
         {{ busy ? t('form.processing') : t('form.addPhoto') }}
       </button>
     </div>

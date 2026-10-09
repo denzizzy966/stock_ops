@@ -14,7 +14,7 @@ const open = ref(true)
     <div class="row" style="gap: 8px">
       <div class="grow" style="min-width: 0"><slot name="bar" /></div>
       <button v-if="slots.default && collapsible" class="filter-btn" :class="{ on: open }" @click="open = !open" aria-label="filter">
-        <span class="fb-ic">⚙</span>
+        <span class="fb-ic"><Icon name="filter" /></span>
         <span v-if="count" class="fb-badge">{{ count }}</span>
         <span class="fb-chev">{{ open ? '▲' : '▼' }}</span>
       </button>

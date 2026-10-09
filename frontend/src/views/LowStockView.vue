@@ -96,12 +96,12 @@ function fmt(n) {
       </div>
     </FilterBar>
 
-    <div v-if="restricted" class="tiny muted" style="margin: 6px 4px">🔒 {{ t('balance.restricted') }}: {{ warehouses.join(', ') }}</div>
+    <div v-if="restricted" class="tiny muted" style="margin: 6px 4px"><Icon name="lock" /> {{ t('balance.restricted') }}: {{ warehouses.join(', ') }}</div>
 
     <div v-if="loading">
       <div class="card" v-for="i in 4" :key="i" style="margin-top: 10px"><div class="skel skel-line" style="width: 55%"></div><div class="skel skel-line" style="width: 30%"></div></div>
     </div>
-    <div v-else-if="!items.length" class="empty"><div class="big">✅</div>{{ t('low.empty') }}</div>
+    <div v-else-if="!items.length" class="empty"><div class="big"><Icon name="check-circle" /></div>{{ t('low.empty') }}</div>
 
     <div v-else>
       <div
@@ -110,10 +110,10 @@ function fmt(n) {
         class="list-item mt12"
         :style="sel[keyOf(b)] ? 'outline: 2px solid var(--brand); outline-offset: -2px' : ''"
       >
-        <span class="lead-icon" :style="{ background: b.actual_qty <= 0 ? 'var(--danger)' : 'var(--warn)' }">⚠️</span>
+        <span class="lead-icon" :style="{ background: b.actual_qty <= 0 ? 'var(--danger)' : 'var(--warn)' }"><Icon name="warning" /></span>
         <div class="grow" style="min-width: 0; cursor: pointer" @click="router.push(`/item/${encodeURIComponent(b.item_code)}`)">
           <div class="truncate" style="font-weight: 600">{{ b.item_name }}</div>
-          <div class="tiny muted truncate">{{ b.item_code }} · 🏬 {{ b.warehouse }}</div>
+          <div class="tiny muted truncate">{{ b.item_code }} · <Icon name="warehouse" /> {{ b.warehouse }}</div>
           <div class="tiny muted">{{ t('low.level') }}: {{ fmt(b.limit) }} · {{ t('low.reqQty') }} <b style="color: var(--brand)">{{ fmt(suggest(b)) }}</b> {{ b.stock_uom }}</div>
         </div>
         <div style="text-align: right; margin-right: 4px">
@@ -127,7 +127,7 @@ function fmt(n) {
   <!-- bar bulk request melayang -->
   <div v-if="selCount" style="position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 10px); width: 100%; max-width: 520px; padding: 0 14px; z-index: 25">
     <button class="btn brand block" :disabled="saving" @click="bulkRequest" style="box-shadow: var(--shadow)">
-      🛒 {{ saving ? '…' : t('low.bulkRequest') }} · {{ t('low.selected', { n: selCount }) }}
+      <Icon name="cart" /> {{ saving ? '…' : t('low.bulkRequest') }} · {{ t('low.selected', { n: selCount }) }}
     </button>
   </div>
 </template>
