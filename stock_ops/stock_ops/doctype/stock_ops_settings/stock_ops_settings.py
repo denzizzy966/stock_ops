@@ -11,7 +11,8 @@ class StockOpsSettings(Document):
 		self.validate_issue_purposes()
 
 	def validate_issue_purposes(self):
-		"""Tujuan Stock Out: cost center harus non-grup & tiap tujuan unik per perusahaan."""
+		"""Tujuan: cost center harus non-grup & tiap tujuan unik per perusahaan + jenis dokumen
+		("Semua" bertabrakan dengan jenis apa pun bernama sama)."""
 		seen = set()
 		for row in self.get("issue_purposes") or []:
 			row.purpose = (row.purpose or "").strip()
@@ -20,7 +21,10 @@ class StockOpsSettings(Document):
 				continue
 			if cc.is_group:
 				frappe.throw(_("Baris {0}: Cost Center {1} adalah grup — pilih cost center non-grup.").format(row.idx, row.cost_center))
-			key = (row.purpose.lower(), cc.company)
-			if key in seen:
-				frappe.throw(_("Baris {0}: Tujuan \"{1}\" sudah ada untuk perusahaan {2}.").format(row.idx, row.purpose, cc.company))
-			seen.add(key)
+			applies = row.get("applies_to") or "Semua"
+			kinds = ("Stock Out", "Penerimaan Barang") if applies == "Semua" else (applies,)
+			for kind in kinds:
+				key = (row.purpose.lower(), cc.company, kind)
+				if key in seen:
+					frappe.throw(_("Baris {0}: Tujuan \"{1}\" sudah ada untuk {2} perusahaan {3}.").format(row.idx, row.purpose, kind, cc.company))
+				seen.add(key)

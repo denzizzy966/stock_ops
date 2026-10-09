@@ -87,15 +87,15 @@
   {
    "fieldname": "issue_purpose_section",
    "fieldtype": "Section Break",
-   "label": "Tujuan Stock Out",
-   "description": "Tujuan yang dipilih staf saat Stock Out (Barang Keluar). Setiap tujuan dipetakan ke satu Cost Center; semua baris Stock Out memakai cost center tujuan tsb (mengalahkan Default Cost Center). Perusahaan tujuan = perusahaan cost center-nya."
+   "label": "Tujuan → Cost Center (Stock Out & Penerimaan Barang)",
+   "description": "Tujuan yang dipilih staf saat Stock Out (Barang Keluar) dan/atau Penerimaan Barang. Setiap tujuan dipetakan ke satu Cost Center; semua baris dokumen memakai cost center tujuan tsb (Stock Out: mengalahkan Default Cost Center). Perusahaan tujuan = perusahaan cost center-nya. Kolom \"Berlaku untuk\" menentukan di form mana tujuan muncul. Bila tabel kosong, pilihan Tujuan tidak tampil di aplikasi."
   },
   {
    "fieldname": "issue_purpose_required",
    "fieldtype": "Check",
    "label": "Tujuan wajib diisi",
    "default": "0",
-   "description": "Bila dicentang, Stock Out wajib memilih tujuan (hanya untuk perusahaan yang punya tujuan)."
+   "description": "Bila dicentang, Stock Out / Penerimaan Barang wajib memilih tujuan (hanya bila ada tujuan untuk perusahaan & jenis dokumen tsb)."
   },
   {
    "fieldname": "issue_purposes",
@@ -229,7 +229,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-10-10 00:00:00",
+ "modified": "2026-10-10 02:00:00",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Settings",

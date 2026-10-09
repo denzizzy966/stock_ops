@@ -81,14 +81,14 @@ PURPOSE_FIELD = {
 	"no_copy": 1,
 	"in_standard_filter": 1,
 	"insert_after": "stock_ops_geolocation",
-	"description": "Tujuan barang keluar dari aplikasi Stock Ops; menentukan cost center (Stock Ops Settings).",
+	"description": "Tujuan dari aplikasi Stock Ops (Stock Out / Penerimaan Barang); menentukan cost center (Stock Ops Settings).",
 }
 
 CUSTOM_FIELDS = {
 	"Material Request": [dict(LOCALID_FIELD), dict(GEO_FIELD), dict(APPROVER_FIELD), dict(APPROVAL_NOTE_FIELD), dict(MR_REMARKS_FIELD)],
 	"Stock Entry": [dict(LOCALID_FIELD), dict(GEO_FIELD), dict(PURPOSE_FIELD)],
 	"Stock Reconciliation": [dict(LOCALID_FIELD)],
-	"Purchase Receipt": [dict(LOCALID_FIELD), dict(GEO_FIELD)],
+	"Purchase Receipt": [dict(LOCALID_FIELD), dict(GEO_FIELD), dict(PURPOSE_FIELD)],
 	# Quotation: hanya perlu idempotensi + catatan (tanpa gudang/geo).
 	"Quotation": [dict(LOCALID_FIELD), dict(QTN_REMARKS_FIELD)],
 	# Pengaitan gudang per employee (dipakai Stock Ops untuk membatasi stok/pergerakan)

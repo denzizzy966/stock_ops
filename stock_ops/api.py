@@ -1041,23 +1041,29 @@ def _purchase_receipt_from_po(data):
 	if not pr.items:
 		frappe.throw(_("Tidak ada item Purchase Order yang diterima."))
 
-	for f in ("posting_date", "set_warehouse", "external_localid", "stock_ops_geolocation", "remarks"):
+	for f in ("posting_date", "set_warehouse", "external_localid", "stock_ops_geolocation", "remarks", "stock_ops_purpose"):
 		if data.get(f):
 			pr.set(f, data[f])
 	return pr
 
 
-def _issue_purposes(company=None):
-	"""Daftar Tujuan Stock Out → cost center (Stock Ops Settings › Tujuan Stock Out).
+# Jenis dokumen yang memakai Tujuan → cost center (nilai kolom "Berlaku untuk").
+PURPOSE_APPLIES = {"SE_OUT": "Stock Out", "GRN": "Penerimaan Barang"}
+
+
+def _issue_purposes(company=None, applies=None):
+	"""Daftar Tujuan → cost center (Stock Ops Settings › Tujuan → Cost Center).
 
 	Perusahaan tiap tujuan = perusahaan cost center-nya, sehingga satu nama tujuan boleh
-	dipetakan ke cost center berbeda per perusahaan. `company` = saring satu perusahaan."""
+	dipetakan ke cost center berbeda per perusahaan. `applies_to` = "Semua" / "Stock Out" /
+	"Penerimaan Barang". `company` & `applies` = saring (opsional)."""
 	if not frappe.db.exists("DocType", "Stock Ops Issue Purpose"):
 		return []
+	has_applies = bool(frappe.get_meta("Stock Ops Issue Purpose").get_field("applies_to"))
 	rows = frappe.get_all(
 		"Stock Ops Issue Purpose",
 		filters={"parent": "Stock Ops Settings", "parenttype": "Stock Ops Settings"},
-		fields=["purpose", "cost_center"],
+		fields=["purpose", "cost_center"] + (["applies_to"] if has_applies else []),
 		order_by="idx asc",
 	)
 	ccs = [r.cost_center for r in rows if r.cost_center]
@@ -1067,34 +1073,48 @@ def _issue_purposes(company=None):
 		else {}
 	)
 	out = [
-		{"purpose": r.purpose, "cost_center": r.cost_center, "company": cc_company.get(r.cost_center)}
+		{
+			"purpose": r.purpose,
+			"cost_center": r.cost_center,
+			"company": cc_company.get(r.cost_center),
+			"applies_to": r.get("applies_to") or "Semua",
+		}
 		for r in rows
 		if r.purpose and r.cost_center
 	]
-	return [p for p in out if p["company"] == company] if company else out
+	if company:
+		out = [p for p in out if p["company"] == company]
+	if applies:
+		out = [p for p in out if p["applies_to"] in ("Semua", applies)]
+	return out
 
 
 def _apply_issue_cost_center(doc):
-	"""Stock Out (Material Issue): satu cost center seragam untuk semua baris.
-
-	Prioritas: Tujuan (`stock_ops_purpose`) yang dipetakan di Stock Ops Settings → lalu Default
-	Cost Center (bila milik perusahaan dokumen). Bila keduanya kosong, ERPNext mengisi cost
-	center dari Item/Company seperti biasa. Tujuan wajib bila diatur & ada tujuan untuk perusahaan.
+	"""Tujuan → satu cost center seragam untuk semua baris, pada:
+	- Stock Out (Stock Entry · Material Issue) → tujuan "Stock Out"/"Semua"; bila tanpa tujuan
+	  dipakai Default Cost Center (bila milik perusahaan dokumen).
+	- Penerimaan Barang (Purchase Receipt, bukan retur) → tujuan "Penerimaan Barang"/"Semua".
+	Tujuan wajib bila diatur & ada tujuan untuk perusahaan + jenis dokumen tsb. Bila tak ada cost
+	center terpilih, ERPNext mengisi dari Item/Company/PO seperti biasa.
 	"""
-	if doc.doctype != "Stock Entry" or doc.get("stock_entry_type") != "Material Issue":
+	if doc.doctype == "Stock Entry" and doc.get("stock_entry_type") == "Material Issue":
+		applies, label = "Stock Out", _("Stock Out")
+	elif doc.doctype == "Purchase Receipt" and not doc.get("is_return"):
+		applies, label = "Penerimaan Barang", _("Penerimaan Barang")
+	else:
 		return
 	purpose = (doc.get("stock_ops_purpose") or "").strip()
-	purposes = _issue_purposes(doc.company)
+	purposes = _issue_purposes(doc.company, applies)
 	cc = None
 	if purpose:
 		match = next((p for p in purposes if p["purpose"] == purpose), None)
 		if not match:
-			frappe.throw(_("Tujuan \"{0}\" tidak terdaftar untuk perusahaan {1}.").format(purpose, doc.company))
+			frappe.throw(_("Tujuan \"{0}\" tidak terdaftar untuk {1} perusahaan {2}.").format(purpose, label, doc.company))
 		doc.stock_ops_purpose = purpose
 		cc = match["cost_center"]
 	elif purposes and frappe.db.get_single_value("Stock Ops Settings", "issue_purpose_required"):
-		frappe.throw(_("Tujuan wajib diisi untuk Stock Out."))
-	else:
+		frappe.throw(_("Tujuan wajib diisi untuk {0}.").format(label))
+	elif applies == "Stock Out":
 		cc = frappe.db.get_single_value("Stock Ops Settings", "default_cost_center")
 		if cc and frappe.db.get_value("Cost Center", cc, "company") != doc.company:
 			cc = None

@@ -21,6 +21,8 @@ function buildPR(doc) {
     external_localid: doc.localId,
     stock_ops_geolocation: doc.geo || undefined,
     remarks: doc.remark || undefined,
+    // Tujuan → cost center seragam (diterapkan server dari Stock Ops Settings)
+    stock_ops_purpose: doc.purpose || undefined,
     items: doc.items.map((i) => {
       const accepted = Number(i.qty) || 0
       const rejected = Number(i.rejectedQty) || 0

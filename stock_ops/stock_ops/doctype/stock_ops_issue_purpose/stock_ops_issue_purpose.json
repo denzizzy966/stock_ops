@@ -5,14 +5,44 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "istable": 1,
- "field_order": ["purpose", "cost_center"],
+ "field_order": [
+  "purpose",
+  "cost_center",
+  "applies_to"
+ ],
  "fields": [
-  {"fieldname": "purpose", "fieldtype": "Data", "label": "Tujuan", "reqd": 1, "in_list_view": 1, "columns": 5, "description": "Nama tujuan yang dipilih staf saat Stock Out, mis. Operasional Dapur."},
-  {"fieldname": "cost_center", "fieldtype": "Link", "label": "Cost Center", "options": "Cost Center", "reqd": 1, "in_list_view": 1, "columns": 5}
+  {
+   "fieldname": "purpose",
+   "fieldtype": "Data",
+   "label": "Tujuan",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 4,
+   "description": "Nama tujuan yang dipilih staf saat Stock Out, mis. Operasional Dapur."
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 4
+  },
+  {
+   "fieldname": "applies_to",
+   "fieldtype": "Select",
+   "label": "Berlaku untuk",
+   "options": "Semua\nStock Out\nPenerimaan Barang",
+   "default": "Semua",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2
+  }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-10-10 00:00:00",
+ "modified": "2026-10-10 02:00:00",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Issue Purpose",

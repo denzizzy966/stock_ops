@@ -45,9 +45,22 @@ watch(
       doc.targetWarehouse = opts[Math.min(1, opts.length - 1)] || ''
   }
 )
-// Stock Out: Tujuan → cost center (Stock Ops Settings), disaring per perusahaan dokumen.
-const purposeOptions = computed(() => (master.issuePurposes || []).filter((p) => p.company === doc.company))
-const showPurpose = computed(() => cfg && cfg.key === 'SE_OUT' && purposeOptions.value.length > 0)
+// Tujuan → cost center (Stock Ops Settings) untuk Stock Out & Penerimaan Barang,
+// disaring per perusahaan dokumen + kolom "Berlaku untuk".
+const PURPOSE_APPLIES = { SE_OUT: 'Stock Out', GRN: 'Penerimaan Barang' }
+const purposeKind = cfg ? PURPOSE_APPLIES[cfg.key] : null
+const purposeOptions = computed(() =>
+  purposeKind
+    ? (master.issuePurposes || []).filter(
+        (p) => p.company === doc.company && ['Semua', purposeKind].includes(p.applies_to || 'Semua')
+      )
+    : []
+)
+const showPurpose = computed(() => purposeOptions.value.length > 0)
+// Pilihan Tujuan disembunyikan bila belum diatur — beri tahu manajer di mana mengaturnya.
+const purposeNotSet = computed(
+  () => !!purposeKind && !purposeOptions.value.length && !!(master.caps && (master.caps.is_manager || master.caps.is_system_manager))
+)
 const purposeNames = computed(() => purposeOptions.value.map((p) => p.purpose))
 const purposeCostCenter = computed(() => {
   const p = purposeOptions.value.find((o) => o.purpose === doc.purpose)
@@ -293,6 +306,9 @@ async function save() {
         <SearchSelect v-model="doc.purpose" :options="purposeNames" clearable :placeholder="t('form.purpose')" />
         <div v-if="purposeCostCenter" class="tiny muted" style="margin-top: 4px">{{ t('form.costCenter') }}: {{ purposeCostCenter }}</div>
       </div>
+      <div v-else-if="purposeNotSet" class="purpose-hint">
+        <Icon name="warning" /> {{ t('form.purposeNotSet', { company: doc.company }) }}
+      </div>
 
       <div v-if="cfg.acceptReject && hasRejected" class="field">
         <label>{{ t('form.rejectedWh') }}</label>
@@ -401,6 +417,10 @@ async function save() {
 </template>
 
 <style scoped>
+.purpose-hint {
+  margin: -4px 0 14px; padding: 8px 10px; border-radius: 10px; font-size: 12px; line-height: 1.4;
+  color: #92400e; background: #fef3c7; border: 1px solid #fcd34d;
+}
 .mini-num {
   width: 64px; border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px;
   background: var(--input-bg); color: var(--ink); text-align: center; font-size: 15px;
