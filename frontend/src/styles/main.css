@@ -342,8 +342,10 @@ a { color: inherit; text-decoration: none; }
 .chip.active { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
 .chip:active { transform: scale(0.96); }
 
-/* sticky toolbar — kontainer scroll = .content (sudah di bawah appbar), jadi top: 0 */
-.toolbar { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 12px 0 8px; margin: -14px 0 0; }
+/* sticky toolbar (pencarian/filter) — kontainer scroll = .content yang punya padding-top 14px.
+   Sticky dihitung DI DALAM padding itu, jadi top:0 menyisakan celah 14px di bawah header tempat isi
+   daftar terlihat saat scroll. top: -14px membatalkan padding → bar menempel rapat ke header. */
+.toolbar { position: sticky; top: -14px; z-index: 20; background: var(--bg); padding: 12px 0 8px; margin: -14px 0 0; }
 .toolbar .filter-body { animation: fb-in .18s ease; }
 @keyframes fb-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
