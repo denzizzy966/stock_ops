@@ -70,8 +70,20 @@ export const useApp = defineStore('app', {
       const companies = m.companyNames
       const patch = {}
       let company = this.settings.company
+      const serverCompany = m.defaults && m.defaults.company
+      // Perusahaan default dari server (Employee/lingkup user) berubah sejak sinkron terakhir —
+      // mis. Employee dipindah perusahaan → ikuti. Bila Company terkunci, selalu ikut server.
+      // Di luar itu pilihan manual user multi-perusahaan tetap dipertahankan.
+      if (
+        serverCompany &&
+        (serverCompany !== this.settings.serverCompany || (m.defaults.company_read_only && company !== serverCompany))
+      ) {
+        company = serverCompany
+        patch.company = serverCompany
+        patch.serverCompany = serverCompany
+      }
       if (companies.length && !companies.includes(company)) {
-        company = (m.defaults && m.defaults.company) || companies[0]
+        company = serverCompany || companies[0]
         patch.company = company
       }
       const whs = m.warehousesForCompany(company)

@@ -100,8 +100,12 @@ export const createQuotation = (customer, items, company, externalLocalid, remar
   )
 
 // Persetujuan (workflow-driven — mengikuti Workflow di server/Desk, tak hardcode aksi)
-export const listPendingApprovals = (limit = 50) =>
-  call('stock_ops.api.list_pending_approvals', { limit })
+export const listPendingApprovals = (limit = 50, all = 0) =>
+  call('stock_ops.api.list_pending_approvals', { limit, all })
+// System Manager: ganti approver permintaan yang Menunggu Persetujuan + cari calon approver
+export const changeApprover = (name, approver, reason) =>
+  call('stock_ops.api.change_approver', { name, approver, reason }, { post: true })
+export const searchUsers = (txt) => call('stock_ops.api.search_users', { txt })
 export const getWorkflowTransitions = (doctype, name) =>
   call('stock_ops.api.get_workflow_transitions', { doctype, name })
 export const applyWorkflowAction = (doctype, name, action, note) =>

@@ -77,6 +77,8 @@ export const useDocs = defineStore('docs', {
         assetLocation: '',
         // Retur Barang (Purchase Return): Purchase Receipt asal yang diretur
         returnAgainst: '',
+        // Stock Out: tujuan barang keluar (dipetakan ke cost center di server)
+        purpose: '',
         // Status workflow (mis. MR Purchase: Pending Approval / Approved / Rejected)
         workflowState: null,
         remark: '',

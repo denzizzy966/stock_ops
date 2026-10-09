@@ -45,6 +45,16 @@ watch(
       doc.targetWarehouse = opts[Math.min(1, opts.length - 1)] || ''
   }
 )
+// Stock Out: Tujuan → cost center (Stock Ops Settings), disaring per perusahaan dokumen.
+const purposeOptions = computed(() => (master.issuePurposes || []).filter((p) => p.company === doc.company))
+const showPurpose = computed(() => cfg && cfg.key === 'SE_OUT' && purposeOptions.value.length > 0)
+const purposeCostCenter = computed(() => {
+  const p = purposeOptions.value.find((o) => o.purpose === doc.purpose)
+  return p ? p.cost_center : ''
+})
+watch(purposeOptions, (opts) => {
+  if (doc.purpose && !opts.some((o) => o.purpose === doc.purpose)) doc.purpose = ''
+})
 const showPicker = ref(false)
 const showPO = ref(false)
 const loadingPO = ref(false)
@@ -203,6 +213,7 @@ function valid() {
   if (cfg.source && !doc.sourceWarehouse) return t('form.vSrc')
   if (cfg.target && !doc.targetWarehouse) return t('form.vTgt')
   if (cfg.source && cfg.target && doc.sourceWarehouse === doc.targetWarehouse) return t('form.vSame')
+  if (showPurpose.value && master.issuePurposeRequired && !doc.purpose) return t('form.vPurpose')
   return null
 }
 
@@ -255,7 +266,7 @@ async function save() {
 
       <div v-if="cfg.supplier" class="field">
         <label>{{ t('form.supplier') }}<span v-if="!cfg.supplierRequired"> ({{ t('common.optional') }})</span></label>
-        <select v-model="doc.supplier">
+        <select v-model="doc.supplier" :disabled="!!doc.purchaseOrder">
           <option value="">—</option>
           <option v-for="s in SUPPLIERS" :key="s">{{ s }}</option>
         </select>
@@ -279,6 +290,15 @@ async function save() {
           <label>{{ cfg.acceptReject ? t('form.acceptedWh') : t('form.targetWh') }}</label>
           <WarehouseSelect v-model="doc.targetWarehouse" :options="warehouseOptions" :placeholder="cfg.acceptReject ? t('form.acceptedWh') : t('form.targetWh')" />
         </div>
+      </div>
+
+      <div v-if="showPurpose" class="field">
+        <label>{{ t('form.purpose') }}<span v-if="!master.issuePurposeRequired"> ({{ t('common.optional') }})</span></label>
+        <select v-model="doc.purpose">
+          <option value="">—</option>
+          <option v-for="p in purposeOptions" :key="p.purpose" :value="p.purpose">{{ p.purpose }}</option>
+        </select>
+        <div v-if="purposeCostCenter" class="tiny muted" style="margin-top: 4px">{{ t('form.costCenter') }}: {{ purposeCostCenter }}</div>
       </div>
 
       <div v-if="cfg.acceptReject && hasRejected" class="field">

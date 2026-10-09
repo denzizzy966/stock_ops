@@ -33,12 +33,22 @@ const localList = computed(() =>
 )
 
 // ===== Server =====
+// Perusahaan daftar server = perusahaan aktif perangkat (mengikuti Employee, lihat reconcileDefaults).
+// User dengan beberapa perusahaan bisa menggantinya di sini; Company terkunci → hanya label.
+const companyLocked = computed(() => !!(master.defaults && master.defaults.company_read_only))
+const listCompany = computed({
+  get: () => app.settings.company,
+  set: (v) => {
+    app.saveSettings({ company: v })
+    loadServer()
+  }
+})
 const serverDocs = ref([])
 const loadingServer = ref(false)
 async function loadServer() {
   loadingServer.value = true
   try {
-    serverDocs.value = await listRecent(app.settings.company, 30)
+    serverDocs.value = await listRecent(listCompany.value, 30)
   } catch (e) {
     app.notify(e && e.message ? e.message : String(e), 'error')
     serverDocs.value = []
@@ -123,8 +133,16 @@ function openInErp(d) {
 
     <!-- ===== SERVER ===== -->
     <template v-else>
-      <div class="row between" style="margin: 2px 4px 8px">
-        <span class="tiny muted">{{ app.settings.company }}</span>
+      <div class="row between" style="margin: 2px 4px 8px; gap: 8px; align-items: center">
+        <select
+          v-if="!companyLocked && master.companyNames.length > 1"
+          v-model="listCompany"
+          class="company-select"
+          :aria-label="t('form.company')"
+        >
+          <option v-for="c in master.companyNames" :key="c" :value="c">{{ c }}</option>
+        </select>
+        <span v-else class="tiny muted truncate">{{ listCompany }}</span>
         <button class="btn sm" :disabled="loadingServer" @click="loadServer">🔄</button>
       </div>
       <div v-if="loadingServer" class="empty"><div class="big">⏳</div>…</div>
@@ -154,6 +172,10 @@ function openInErp(d) {
 .wf-mini.pending { background: #fef3c7; color: #92400e; }
 .wf-mini.rejected { background: #fee2e2; color: #991b1b; }
 .wf-mini.approved { background: #dcfce7; color: #166534; }
+.company-select {
+  flex: 1; min-width: 0; border: 1px solid var(--line); background: var(--input-bg); color: var(--ink);
+  border-radius: 10px; padding: 8px 10px; font-size: 13px; font-weight: 600;
+}
 .desk-icon {
   flex: none; align-self: center; text-decoration: none; font-size: 16px; line-height: 1;
   padding: 8px 9px; border: 1px solid var(--line); border-radius: 8px; margin-left: 4px;

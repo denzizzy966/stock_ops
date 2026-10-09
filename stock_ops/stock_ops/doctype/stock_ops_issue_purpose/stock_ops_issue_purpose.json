@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "creation": "2026-10-10 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": ["purpose", "cost_center"],
+ "fields": [
+  {"fieldname": "purpose", "fieldtype": "Data", "label": "Tujuan", "reqd": 1, "in_list_view": 1, "columns": 5, "description": "Nama tujuan yang dipilih staf saat Stock Out, mis. Operasional Dapur."},
+  {"fieldname": "cost_center", "fieldtype": "Link", "label": "Cost Center", "options": "Cost Center", "reqd": 1, "in_list_view": 1, "columns": 5}
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-10-10 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Stock Ops",
+ "name": "Stock Ops Issue Purpose",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

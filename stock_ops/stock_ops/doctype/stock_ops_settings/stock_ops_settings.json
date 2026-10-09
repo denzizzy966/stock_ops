@@ -12,6 +12,9 @@
   "default_company",
   "default_source_warehouse",
   "default_cost_center",
+  "issue_purpose_section",
+  "issue_purpose_required",
+  "issue_purposes",
   "nav_section",
   "show_stock_balance",
   "show_movement",
@@ -36,47 +39,220 @@
   "menu_overrides"
  ],
  "fields": [
-  {"fieldname": "general_section", "fieldtype": "Section Break", "label": "Umum"},
-  {"fieldname": "default_language", "fieldtype": "Select", "label": "Bahasa Default", "options": "id\nen", "default": "id", "description": "Bahasa awal aplikasi (id = Indonesia, en = English). Pengguna tetap bisa menggantinya di app."},
-  {"fieldname": "flutter_apk_url", "fieldtype": "Data", "label": "URL APK Flutter (Android)", "description": "Tautan unduhan APK Android, mis. /files/StockOps.apk atau URL lengkap. Kosongkan untuk menyembunyikan tombol unduh di PWA."},
-  {"fieldname": "doc_defaults_section", "fieldtype": "Section Break", "label": "Default Dokumen"},
-  {"fieldname": "default_company", "fieldtype": "Link", "options": "Company", "label": "Default Company", "description": "Perusahaan default untuk dokumen baru. Bila user tertaut ke Employee, perusahaan dari Employee yang dipakai (dan read-only di aplikasi)."},
-  {"fieldname": "default_source_warehouse", "fieldtype": "Link", "options": "Warehouse", "label": "Default Source Warehouse", "description": "Gudang sumber/asal default untuk Stock Out (Barang Keluar) & Transfer."},
-  {"fieldname": "default_cost_center", "fieldtype": "Link", "options": "Cost Center", "label": "Default Cost Center (Stock Out)", "description": "Bila diisi, semua baris Stock Out (Material Issue) memakai cost center ini (satu sumber seragam). Hanya diterapkan bila cost center milik perusahaan dokumen; jika kosong/lintas-perusahaan, ERPNext mengisi otomatis dari Item/Company default."},
-  {"fieldname": "nav_section", "fieldtype": "Section Break", "label": "Navigasi & Umum"},
-  {"fieldname": "show_stock_balance", "fieldtype": "Check", "label": "Stok Gudang (tab Stok)", "default": "1"},
-  {"fieldname": "show_movement", "fieldtype": "Check", "label": "Pergerakan Stok (tab Mutasi)", "default": "1"},
-  {"fieldname": "col_1", "fieldtype": "Column Break"},
-  {"fieldname": "show_documents", "fieldtype": "Check", "label": "Daftar Dokumen", "default": "1"},
-  {"fieldname": "show_notifications", "fieldtype": "Check", "label": "Notifikasi (Push)", "default": "1"},
-  {"fieldname": "home_section", "fieldtype": "Section Break", "label": "Beranda & Fitur"},
-  {"fieldname": "show_scan", "fieldtype": "Check", "label": "Cari / Scan Item", "default": "1"},
-  {"fieldname": "show_transfer", "fieldtype": "Check", "label": "Transfer Cepat", "default": "1"},
-  {"fieldname": "show_low_stock", "fieldtype": "Check", "label": "Stok Menipis", "default": "1"},
-  {"fieldname": "col_2", "fieldtype": "Column Break"},
-  {"fieldname": "show_opname", "fieldtype": "Check", "label": "Stock Opname", "default": "1"},
-  {"fieldname": "create_section", "fieldtype": "Section Break", "label": "Buat Dokumen"},
-  {"fieldname": "show_mr", "fieldtype": "Check", "label": "Permintaan Transfer Barang (MR)", "default": "1"},
-  {"fieldname": "show_pr", "fieldtype": "Check", "label": "Permintaan Pembelian Barang (PR)", "default": "1"},
-  {"fieldname": "show_se_in", "fieldtype": "Check", "label": "Stock In (Barang Masuk)", "default": "1"},
-  {"fieldname": "col_3", "fieldtype": "Column Break"},
-  {"fieldname": "show_se_out", "fieldtype": "Check", "label": "Stock Out (Barang Keluar)", "default": "1"},
-  {"fieldname": "show_se_transfer", "fieldtype": "Check", "label": "Transfer Barang", "default": "1"},
-  {"fieldname": "show_purchase_receipt", "fieldtype": "Check", "label": "Penerimaan Barang (Purchase Receipt)", "default": "1"},
-  {"fieldname": "override_section", "fieldtype": "Section Break", "label": "Override per Role", "description": "Atur tampil/sembunyi menu khusus per role. Bila sebuah menu punya baris untuk role yang dimiliki user, nilai role dipakai (tampil bila salah satu role mengizinkan); selain itu memakai default di atas."},
-  {"fieldname": "menu_overrides", "fieldtype": "Table", "label": "Menu per Role", "options": "Stock Ops Menu Override"}
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "Umum"
+  },
+  {
+   "fieldname": "default_language",
+   "fieldtype": "Select",
+   "label": "Bahasa Default",
+   "options": "id\nen",
+   "default": "id",
+   "description": "Bahasa awal aplikasi (id = Indonesia, en = English). Pengguna tetap bisa menggantinya di app."
+  },
+  {
+   "fieldname": "flutter_apk_url",
+   "fieldtype": "Data",
+   "label": "URL APK Flutter (Android)",
+   "description": "Tautan unduhan APK Android, mis. /files/StockOps.apk atau URL lengkap. Kosongkan untuk menyembunyikan tombol unduh di PWA."
+  },
+  {
+   "fieldname": "doc_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Default Dokumen"
+  },
+  {
+   "fieldname": "default_company",
+   "fieldtype": "Link",
+   "options": "Company",
+   "label": "Default Company",
+   "description": "Perusahaan default untuk dokumen baru. Bila user tertaut ke Employee, perusahaan dari Employee yang dipakai (dan read-only di aplikasi)."
+  },
+  {
+   "fieldname": "default_source_warehouse",
+   "fieldtype": "Link",
+   "options": "Warehouse",
+   "label": "Default Source Warehouse",
+   "description": "Gudang sumber/asal default untuk Stock Out (Barang Keluar) & Transfer."
+  },
+  {
+   "fieldname": "default_cost_center",
+   "fieldtype": "Link",
+   "options": "Cost Center",
+   "label": "Default Cost Center (Stock Out)",
+   "description": "Bila diisi, semua baris Stock Out (Material Issue) memakai cost center ini (satu sumber seragam). Hanya diterapkan bila cost center milik perusahaan dokumen; jika kosong/lintas-perusahaan, ERPNext mengisi otomatis dari Item/Company default."
+  },
+  {
+   "fieldname": "issue_purpose_section",
+   "fieldtype": "Section Break",
+   "label": "Tujuan Stock Out",
+   "description": "Tujuan yang dipilih staf saat Stock Out (Barang Keluar). Setiap tujuan dipetakan ke satu Cost Center; semua baris Stock Out memakai cost center tujuan tsb (mengalahkan Default Cost Center). Perusahaan tujuan = perusahaan cost center-nya."
+  },
+  {
+   "fieldname": "issue_purpose_required",
+   "fieldtype": "Check",
+   "label": "Tujuan wajib diisi",
+   "default": "0",
+   "description": "Bila dicentang, Stock Out wajib memilih tujuan (hanya untuk perusahaan yang punya tujuan)."
+  },
+  {
+   "fieldname": "issue_purposes",
+   "fieldtype": "Table",
+   "label": "Tujuan → Cost Center",
+   "options": "Stock Ops Issue Purpose"
+  },
+  {
+   "fieldname": "nav_section",
+   "fieldtype": "Section Break",
+   "label": "Navigasi & Umum"
+  },
+  {
+   "fieldname": "show_stock_balance",
+   "fieldtype": "Check",
+   "label": "Stok Gudang (tab Stok)",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_movement",
+   "fieldtype": "Check",
+   "label": "Pergerakan Stok (tab Mutasi)",
+   "default": "1"
+  },
+  {
+   "fieldname": "col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_documents",
+   "fieldtype": "Check",
+   "label": "Daftar Dokumen",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_notifications",
+   "fieldtype": "Check",
+   "label": "Notifikasi (Push)",
+   "default": "1"
+  },
+  {
+   "fieldname": "home_section",
+   "fieldtype": "Section Break",
+   "label": "Beranda & Fitur"
+  },
+  {
+   "fieldname": "show_scan",
+   "fieldtype": "Check",
+   "label": "Cari / Scan Item",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_transfer",
+   "fieldtype": "Check",
+   "label": "Transfer Cepat",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_low_stock",
+   "fieldtype": "Check",
+   "label": "Stok Menipis",
+   "default": "1"
+  },
+  {
+   "fieldname": "col_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_opname",
+   "fieldtype": "Check",
+   "label": "Stock Opname",
+   "default": "1"
+  },
+  {
+   "fieldname": "create_section",
+   "fieldtype": "Section Break",
+   "label": "Buat Dokumen"
+  },
+  {
+   "fieldname": "show_mr",
+   "fieldtype": "Check",
+   "label": "Permintaan Transfer Barang (MR)",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_pr",
+   "fieldtype": "Check",
+   "label": "Permintaan Pembelian Barang (PR)",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_se_in",
+   "fieldtype": "Check",
+   "label": "Stock In (Barang Masuk)",
+   "default": "1"
+  },
+  {
+   "fieldname": "col_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "show_se_out",
+   "fieldtype": "Check",
+   "label": "Stock Out (Barang Keluar)",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_se_transfer",
+   "fieldtype": "Check",
+   "label": "Transfer Barang",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Penerimaan Barang (Purchase Receipt)",
+   "default": "1"
+  },
+  {
+   "fieldname": "override_section",
+   "fieldtype": "Section Break",
+   "label": "Override per Role",
+   "description": "Atur tampil/sembunyi menu khusus per role. Bila sebuah menu punya baris untuk role yang dimiliki user, nilai role dipakai (tampil bila salah satu role mengizinkan); selain itu memakai default di atas."
+  },
+  {
+   "fieldname": "menu_overrides",
+   "fieldtype": "Table",
+   "label": "Menu per Role",
+   "options": "Stock Ops Menu Override"
+  }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-06-04 00:00:00",
+ "modified": "2026-10-10 00:00:00",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Settings",
  "owner": "Administrator",
  "permissions": [
-  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
-  {"role": "Stock Manager", "read": 1, "write": 1, "create": 1, "delete": 1},
-  {"role": "Stock User", "read": 1}
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Stock Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "delete": 1
+  },
+  {
+   "role": "Stock User",
+   "read": 1
+  }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",

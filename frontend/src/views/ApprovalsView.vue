@@ -3,7 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useApp } from '../stores/app'
 import { useMaster } from '../stores/master'
 import { useI18n } from '../lib/i18n'
-import { listPendingApprovals, getWorkflowTransitions, applyWorkflowAction, getApprovalDetail } from '../lib/service'
+import { listPendingApprovals, getWorkflowTransitions, applyWorkflowAction, getApprovalDetail, changeApprover, searchUsers } from '../lib/service'
 import AppBar from '../components/AppBar.vue'
 import Sheet from '../components/Sheet.vue'
 import SearchInput from '../components/SearchInput.vue'
@@ -16,6 +16,9 @@ const rows = ref([])
 const q = ref('')
 const companyFilter = ref('ALL')
 const busy = ref('')
+// System Manager: tab "Semua" = seluruh permintaan menunggu persetujuan (bisa ganti approver).
+const isSysMgr = computed(() => !!(master.caps && master.caps.is_system_manager))
+const mode = ref('mine') // 'mine' | 'all'
 
 // Detail sheet
 const open = ref(false)
@@ -39,8 +42,8 @@ const filtered = computed(() => {
 async function load() {
   loading.value = true
   try {
-    rows.value = (await listPendingApprovals()) || []
-    master.pendingApprovals = rows.value.length
+    rows.value = (await listPendingApprovals(50, mode.value === 'all' ? 1 : 0)) || []
+    if (mode.value === 'mine') master.pendingApprovals = rows.value.length
   } catch (e) {
     app.notify(e && e.message ? e.message : String(e), 'error')
     rows.value = []
@@ -49,10 +52,64 @@ async function load() {
   }
 }
 onMounted(load)
+function setMode(m) {
+  if (mode.value === m) return
+  mode.value = m
+  load()
+}
+
+// ===== Ganti approver (System Manager) =====
+const newApprover = ref('')
+const approverQuery = ref('')
+const approverHits = ref([])
+const changeReason = ref('')
+let searchTimer = null
+function onApproverQuery() {
+  newApprover.value = ''
+  clearTimeout(searchTimer)
+  const q = approverQuery.value.trim()
+  if (q.length < 2) return (approverHits.value = [])
+  searchTimer = setTimeout(async () => {
+    try {
+      approverHits.value = (await searchUsers(q)) || []
+    } catch {
+      approverHits.value = []
+    }
+  }, 300)
+}
+function pickApprover(u) {
+  newApprover.value = u.name
+  approverQuery.value = u.full_name ? u.full_name + ' (' + u.name + ')' : u.name
+  approverHits.value = []
+}
+async function saveApprover() {
+  const name = detail.value.name
+  const user = newApprover.value
+  busy.value = name
+  try {
+    await changeApprover(name, user, changeReason.value)
+    app.notify(t('approval.approverChanged', { name, user }), 'success')
+    detail.value.stock_ops_approver = user
+    const row = rows.value.find((r) => r.name === name)
+    if (row) row.stock_ops_approver = user
+    // Tab "Untuk saya": permintaan yang dialihkan ke orang lain hilang dari daftar saya.
+    if (mode.value === 'mine' && user !== (app.user && app.user.email)) {
+      rows.value = rows.value.filter((r) => r.name !== name)
+      open.value = false
+    }
+    newApprover.value = approverQuery.value = changeReason.value = ''
+  } catch (e) {
+    app.notify(e && e.message ? e.message : String(e), 'error')
+  } finally {
+    busy.value = ''
+  }
+}
 
 async function openDetail(row) {
   open.value = true
   loadingDetail.value = true
+  newApprover.value = approverQuery.value = changeReason.value = ''
+  approverHits.value = []
   detail.value = { name: row.name, owner: row.owner, material_request_type: row.material_request_type, company: row.company, items: [] }
   transitions.value = []
   try {
@@ -91,6 +148,10 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
 <template>
   <AppBar :title="t('approval.title')" back />
   <div class="content">
+    <div v-if="isSysMgr" class="seg" style="margin-bottom: 10px">
+      <button :class="{ active: mode === 'mine' }" @click="setMode('mine')">{{ t('approval.mine') }}</button>
+      <button :class="{ active: mode === 'all' }" @click="setMode('all')">{{ t('approval.all') }}</button>
+    </div>
     <div v-if="rows.length" class="row" style="gap: 8px; margin-bottom: 8px">
       <SearchInput v-model="q" :placeholder="t('approval.search')" class="grow" />
       <button class="btn sm" :disabled="loading" @click="load">🔄</button>
@@ -115,6 +176,7 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
       <div class="grow" style="min-width: 0">
         <div class="truncate" style="font-weight: 700">{{ row.name }}</div>
         <div class="tiny muted truncate">{{ row.material_request_type }} · {{ row.owner }} · {{ row.item_count }} {{ t('common.items') }} · {{ row.transaction_date }}</div>
+        <div v-if="mode === 'all'" class="tiny muted truncate">{{ t('approval.approver') }}: <b>{{ row.stock_ops_approver || '—' }}</b></div>
       </div>
       <span style="font-size: 22px; color: var(--brand)">›</span>
     </div>
@@ -130,7 +192,26 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
           <div class="mt8" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
             <div><div class="tiny muted">{{ t('approval.requester') }}</div><div class="small truncate">{{ detail.owner }}</div></div>
             <div><div class="tiny muted">{{ t('form.date') }}</div><div class="small">{{ detail.transaction_date }}</div></div>
+            <div style="grid-column: 1 / -1"><div class="tiny muted">{{ t('approval.approver') }}</div><div class="small truncate">{{ detail.stock_ops_approver || '—' }}</div></div>
           </div>
+        </div>
+
+        <div v-if="isSysMgr && detail.workflow_state === 'Pending Approval'" class="card mt12">
+          <div style="font-weight: 700; margin-bottom: 8px">{{ t('approval.changeApprover') }}</div>
+          <div class="field" style="margin-bottom: 8px; position: relative">
+            <input v-model="approverQuery" :placeholder="t('approval.newApprover')" autocomplete="off" @input="onApproverQuery" />
+            <div v-if="approverHits.length" class="user-hits">
+              <button v-for="u in approverHits" :key="u.name" type="button" class="user-hit" @click="pickApprover(u)">
+                <b>{{ u.full_name || u.name }}</b><span class="tiny muted"> · {{ u.name }}</span>
+              </button>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom: 8px">
+            <input v-model="changeReason" :placeholder="t('approval.reasonOpt')" />
+          </div>
+          <button class="btn brand block" :disabled="!newApprover || busy === detail.name" @click="saveApprover">
+            {{ t('approval.changeApprover') }}
+          </button>
         </div>
 
         <div class="card mt12">
@@ -167,3 +248,15 @@ const totalQty = computed(() => (detail.value?.items || []).reduce((s, i) => s +
     </Sheet>
   </div>
 </template>
+
+<style scoped>
+.user-hits {
+  position: absolute; left: 0; right: 0; z-index: 5; margin-top: 4px; max-height: 220px; overflow-y: auto;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow);
+}
+.user-hit {
+  display: block; width: 100%; text-align: left; border: 0; background: transparent; color: var(--ink);
+  padding: 10px 12px; font-size: 14px; border-bottom: 1px solid var(--line);
+}
+.user-hit:last-child { border-bottom: 0; }
+</style>

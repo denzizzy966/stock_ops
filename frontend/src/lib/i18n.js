@@ -38,7 +38,10 @@ const messages = {
       search: 'Cari nomor / pemohon…', reviewTitle: 'Tinjau Permintaan', requester: 'Pemohon',
       reason: 'Alasan penolakan', noReason: '(tidak ada alasan dicantumkan)',
       reopenHint: 'Buka kembali permintaan ini untuk mengajukannya ulang.',
-      reopen: 'Buka Kembali & Ajukan Ulang', reopened: '{name} dibuka kembali — silakan ajukan ulang'
+      reopen: 'Buka Kembali & Ajukan Ulang', reopened: '{name} dibuka kembali — silakan ajukan ulang',
+      mine: 'Untuk saya', all: 'Semua', approver: 'Approver', changeApprover: 'Ganti Approver',
+      newApprover: 'Cari approver baru (nama / email)…', reasonOpt: 'Alasan (opsional)',
+      approverChanged: '{name}: approver diganti ke {user}'
     },
     nav: { home: 'Beranda', list: 'Daftar', create: 'Buat', settings: 'Setelan', sync: 'Sync', balance: 'Stok', movement: 'Mutasi' },
     docType: {
@@ -83,6 +86,7 @@ const messages = {
       saveSync: 'Simpan & Sync (draft)', saveOutbox: 'Simpan ke Outbox',
       vItems: 'Tambahkan minimal 1 item', vQty: 'Qty item tidak boleh 0',
       vSrc: 'Pilih gudang asal', vTgt: 'Pilih gudang tujuan', vSame: 'Gudang asal & tujuan tidak boleh sama',
+      purpose: 'Tujuan', costCenter: 'Cost Center', vPurpose: 'Pilih tujuan barang keluar',
       vSupplier: 'Pilih supplier', whSearch: 'Cari gudang…', whEmpty: 'Gudang tidak ditemukan',
       acceptedWh: 'Gudang Terima', rejectedWh: 'Gudang Tolak', assetLocation: 'Lokasi Aset',
       accepted: 'Terima', rejected: 'Tolak', asset: 'Aset', uom: 'Satuan',
@@ -213,7 +217,10 @@ const messages = {
       search: 'Search no. / requester…', reviewTitle: 'Review Request', requester: 'Requester',
       reason: 'Rejection reason', noReason: '(no reason given)',
       reopenHint: 'Reopen this request to submit it again.',
-      reopen: 'Reopen & Resubmit', reopened: '{name} reopened — you can submit it again'
+      reopen: 'Reopen & Resubmit', reopened: '{name} reopened — you can submit it again',
+      mine: 'Mine', all: 'All', approver: 'Approver', changeApprover: 'Change Approver',
+      newApprover: 'Search new approver (name / email)…', reasonOpt: 'Reason (optional)',
+      approverChanged: '{name}: approver changed to {user}'
     },
     nav: { home: 'Home', list: 'Docs', create: 'New', settings: 'Settings', sync: 'Sync', balance: 'Stock', movement: 'Moves' },
     docType: {
@@ -258,6 +265,7 @@ const messages = {
       saveSync: 'Save & Sync (draft)', saveOutbox: 'Save to Outbox',
       vItems: 'Add at least 1 item', vQty: 'Item qty cannot be 0',
       vSrc: 'Select source warehouse', vTgt: 'Select target warehouse', vSame: 'Source & target warehouse must differ',
+      purpose: 'Purpose', costCenter: 'Cost Center', vPurpose: 'Select the purpose of this stock out',
       vSupplier: 'Select a supplier', whSearch: 'Search warehouse…', whEmpty: 'No warehouse found',
       acceptedWh: 'Accepted Warehouse', rejectedWh: 'Rejected Warehouse', assetLocation: 'Asset Location',
       accepted: 'Accepted', rejected: 'Rejected', asset: 'Asset', uom: 'Unit',

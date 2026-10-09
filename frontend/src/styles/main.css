@@ -186,8 +186,10 @@ a { color: inherit; text-decoration: none; }
   width: 100%; border: 1px solid var(--line); background: var(--input-bg); border-radius: 12px; padding: 12px 14px; color: var(--ink);
 }
 .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--brand); border-color: transparent; }
-.field-row { display: flex; gap: 10px; }
-.field-row .field { flex: 1; }
+/* Pasangan field (mis. Gudang Asal & Tujuan) ditumpuk vertikal: nama gudang panjang tidak
+   lagi mendorong field kedua keluar layar di ponsel. */
+.field-row { display: flex; flex-direction: column; }
+.field-row .field { min-width: 0; }
 
 /* ===== Item line ===== */
 .item-line { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }

@@ -86,6 +86,7 @@ function confirmCancel() {
         <div><div class="tiny muted">{{ t('form.date') }}</div><div class="small">{{ doc.date }}</div></div>
         <div v-if="cfg.source"><div class="tiny muted">{{ t('form.sourceWh') }}</div><div class="small">{{ doc.sourceWarehouse }}</div></div>
         <div v-if="cfg.target"><div class="tiny muted">{{ t('form.targetWh') }}</div><div class="small">{{ doc.targetWarehouse }}</div></div>
+        <div v-if="doc.purpose"><div class="tiny muted">{{ t('form.purpose') }}</div><div class="small">{{ doc.purpose }}</div></div>
         <div v-if="doc.supplier"><div class="tiny muted">{{ t('form.supplier') }}</div><div class="small">{{ doc.supplier }}</div></div>
         <div v-if="doc.customer"><div class="tiny muted">{{ t('form.customer') }}</div><div class="small">{{ doc.customer }}</div></div>
         <div v-if="doc.returnAgainst"><div class="tiny muted">{{ t('ret.receipt') }}</div><div class="small">{{ doc.returnAgainst }}</div></div>

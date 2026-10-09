@@ -85,6 +85,8 @@ function buildSE(doc, cfg) {
     external_localid: doc.localId,
     stock_ops_geolocation: doc.geo || undefined,
     remarks: doc.remark || undefined,
+    // Stock Out: tujuan → cost center seragam (diterapkan server dari Stock Ops Settings)
+    stock_ops_purpose: doc.type === 'SE_OUT' ? doc.purpose || undefined : undefined,
     from_warehouse: cfg.source ? doc.sourceWarehouse : undefined,
     to_warehouse: cfg.target ? doc.targetWarehouse : undefined,
     items: doc.items.map((i) =>

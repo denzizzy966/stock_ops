@@ -34,6 +34,9 @@ export const useMaster = defineStore('master', {
       // Akses Desk (dari server): { can_access, perms: {Doctype: bool} } — untuk tautan "Buka di Desk".
       desk: s.desk || { can_access: false, perms: {} },
       canQuotation: s.canQuotation || false, // user boleh buat Quotation (dari izin server)
+      // Tujuan Stock Out → cost center (Stock Ops Settings): [{purpose, cost_center, company}]
+      issuePurposes: s.issuePurposes || [],
+      issuePurposeRequired: s.issuePurposeRequired || false,
       defaultLang: s.defaultLang || 'id',
       flutterApkUrl: s.flutterApkUrl || '',
       loadedAt: s.loadedAt || null,
@@ -92,6 +95,8 @@ export const useMaster = defineStore('master', {
           pendingApprovals: this.pendingApprovals,
           desk: this.desk,
           canQuotation: this.canQuotation,
+          issuePurposes: this.issuePurposes,
+          issuePurposeRequired: this.issuePurposeRequired,
           defaultLang: this.defaultLang,
           flutterApkUrl: this.flutterApkUrl,
           loadedAt: this.loadedAt
@@ -126,6 +131,8 @@ export const useMaster = defineStore('master', {
         this.pendingApprovals = b.pending_approvals || 0
         this.desk = b.desk || { can_access: false, perms: {} }
         this.canQuotation = !!b.can_quotation
+        this.issuePurposes = b.issue_purposes || []
+        this.issuePurposeRequired = !!b.issue_purpose_required
         this.defaultLang = b.default_lang || 'id'
         this.flutterApkUrl = b.flutter_apk_url || ''
         this.loadedAt = new Date().toISOString()
