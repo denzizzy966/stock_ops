@@ -3,7 +3,7 @@
 // Tujuan: app-shell + aset ter-cache → app bisa diluncurkan offline.
 // Data (api/files) TIDAK di-cache di sini; ditangani layer offline app (IndexedDB + outbox).
 
-const CACHE = 'stockops-v3'
+const CACHE = 'stockops-v4'
 const APP_SHELL = '/stock_ops'
 
 self.addEventListener('install', () => self.skipWaiting())

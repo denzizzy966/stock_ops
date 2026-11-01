@@ -108,11 +108,10 @@ export const useApp = defineStore('app', {
       platform.clearToken()
       this.user = null
       this.persist()
-      // 3) Web (disajikan bench): reload penuh ke halaman login Frappe. Hanya ganti route SPA
-      //    tidak cukup — www page akan menyuntik user sesi lagi. /login di luar scope service
-      //    worker → selalu memuat dari server sebagai Guest.
+      // 3) Web (disajikan bench): reload penuh ke /stock_ops → halaman disajikan sebagai Guest dan
+      //    menampilkan layar login PWA. Hanya ganti route SPA tidak cukup (sesi lama di halaman).
       if (!native && typeof window !== 'undefined' && window.stockops_user) {
-        window.location.replace('/login?redirect-to=/stock_ops')
+        window.location.replace('/stock_ops')
         return true // sedang reload penuh
       }
       return false

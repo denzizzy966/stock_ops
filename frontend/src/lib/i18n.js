@@ -175,7 +175,10 @@ const messages = {
       subtitle: 'Permintaan & Stok Barang — Mobile', email: 'Email', password: 'Password',
       signIn: 'Masuk', mockNote: 'P0 mock — login apa saja diterima. Di P1 terhubung ke sesi ERPNext.',
       server: 'URL Server ERPNext', userId: 'Email / Username',
-      nativeNote: 'Login dengan akun ERPNext Anda. Token disimpan di perangkat.'
+      nativeNote: 'Login dengan akun ERPNext Anda. Token disimpan di perangkat.',
+      webNote: 'Masuk dengan akun ERPNext Anda.', forgot: 'Lupa password?',
+      wrong: 'Email/username atau password salah.', tooMany: 'Terlalu banyak percobaan. Coba lagi beberapa menit lagi.',
+      fill: 'Isi email/username dan password.', noServer: 'Tidak ada koneksi ke server.', failed: 'Gagal masuk (HTTP {n}).'
     },
     status: { pending: 'Pending', syncing: 'Syncing…', synced: 'Synced', error: 'Error', draft: 'Draft', submitted: 'Submitted', cancelled: 'Cancelled', '0': 'Draft', '1': 'Submitted', '2': 'Cancelled' },
     picker: { title: 'Pilih Item', searchPlaceholder: 'Cari nama / kode / barcode…', noMatch: 'Tidak ada item cocok', stockAt: 'Stok tersedia di {wh}',
@@ -365,7 +368,10 @@ const messages = {
       subtitle: 'Material Request & Stock Entry — Mobile', email: 'Email', password: 'Password',
       signIn: 'Sign in', mockNote: 'P0 mock — any login accepted. P1 connects to ERPNext session.',
       server: 'ERPNext Server URL', userId: 'Email / Username',
-      nativeNote: 'Sign in with your ERPNext account. Token stored on device.'
+      nativeNote: 'Sign in with your ERPNext account. Token stored on device.',
+      webNote: 'Sign in with your ERPNext account.', forgot: 'Forgot password?',
+      wrong: 'Wrong email/username or password.', tooMany: 'Too many attempts. Try again in a few minutes.',
+      fill: 'Enter email/username and password.', noServer: 'Cannot reach the server.', failed: 'Sign-in failed (HTTP {n}).'
     },
     status: { pending: 'Pending', syncing: 'Syncing…', synced: 'Synced', error: 'Error', draft: 'Draft', submitted: 'Submitted', cancelled: 'Cancelled', '0': 'Draft', '1': 'Submitted', '2': 'Cancelled' },
     picker: { title: 'Pick Item', searchPlaceholder: 'Search name / code / barcode…', noMatch: 'No matching item', stockAt: 'Available stock at {wh}',

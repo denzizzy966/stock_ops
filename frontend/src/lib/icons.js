@@ -3,6 +3,8 @@
 // Font Awesome Free icons: CC BY 4.0 — https://fontawesome.com/license/free
 import {
   faArrowRightFromBracket,
+  faEye,
+  faEyeSlash,
   faArrowRightToBracket,
   faArrowUpRightFromSquare,
   faArrowsRotate,
@@ -45,6 +47,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 export const ICONS = {
+  eye: faEye,
+  eyeoff: faEyeSlash,
   // navigasi & menu
   home: faHouse,
   warehouse: faWarehouse,

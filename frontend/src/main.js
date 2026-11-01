@@ -23,9 +23,21 @@ const injectedUser = typeof window !== 'undefined' ? window.stockops_user : ''
 const servedByBench = !!injectedUser && injectedUser !== 'Guest' && !injectedUser.includes('{{')
 if (servedByBench) {
   appStore.setUser({ email: injectedUser, name: injectedUser })
+} else if (injectedUser === 'Guest' && appStore.user) {
+  // Halaman disajikan bench untuk tamu (sesi habis / sudah keluar) → user lokal tidak berlaku lagi,
+  // supaya layar login PWA yang tampil (bukan beranda dengan data basi).
+  appStore.setUser(null)
 }
 
 app.mount('#app')
+
+// Splash (index.html) dilepas setelah rute pertama tampil.
+router.isReady().then(() => {
+  const s = document.getElementById('splash')
+  if (!s) return
+  s.classList.add('hide')
+  setTimeout(() => s.remove(), 400)
+})
 
 // Tangkap event install PWA (Android/Chrome) agar bisa dipicu dari tombol di Setelan.
 window.addEventListener('beforeinstallprompt', (e) => {
