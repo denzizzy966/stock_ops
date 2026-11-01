@@ -1,31 +1,39 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useApp } from '../stores/app'
 import { useI18n } from '../lib/i18n'
 import { reportCounts } from '../lib/service'
-import { DOC_TYPES } from '../data/mock'
+import { docTypeCfg } from '../data/mock'
 import AppBar from '../components/AppBar.vue'
 
 const app = useApp()
+const router = useRouter()
 const { t } = useI18n()
 const data = ref(null)
 const loading = ref(false)
 
-const MR_LABEL = { 'Material Transfer': 'MR', Purchase: 'PR' }
-const SE_LABEL = { 'Material Receipt': 'SE_IN', 'Material Issue': 'SE_OUT', 'Material Transfer': 'SE_TRANSFER' }
+// Kelompok laporan → kunci jenis dokumen (sama dengan LIST_TYPES di server).
+const GROUPS = [
+  { title: 'report.mrGroup', keys: ['MR', 'PR'] },
+  { title: 'report.seGroup', keys: ['SE_IN', 'SE_OUT', 'SE_TRANSFER'] },
+  { title: 'report.receiptGroup', keys: ['GRN', 'RET', 'OPN'] }
+]
+const groups = computed(() => {
+  const counts = (data.value && data.value.counts) || {}
+  return GROUPS.map((g) => {
+    const rows = g.keys
+      .filter((k) => counts[k])
+      .map((k) => ({ key: k, label: t('docType.' + k), color: docTypeCfg(k).color, icon: docTypeCfg(k).icon, count: counts[k] }))
+    return { ...g, rows, total: rows.reduce((s, r) => s + r.count, 0) }
+  }).filter((g) => g.rows.length)
+})
+const empty = computed(() => !loading.value && !groups.value.length)
 
-function rows(obj, map) {
-  if (!obj) return []
-  return Object.keys(obj).map((k) => {
-    const key = map[k]
-    return { label: key ? t('docType.' + key) : k, color: key ? DOC_TYPES[key].color : '#888', icon: key ? DOC_TYPES[key].icon : 'list', count: obj[k] }
-  })
+// Drill-down: daftar dokumen server jenis ini sejak awal periode laporan.
+function open(r) {
+  router.push({ name: 'docs', query: { scope: 'server', type: r.key, from: data.value.period } })
 }
-const mrRows = computed(() => rows(data.value && data.value.mr, MR_LABEL))
-const seRows = computed(() => rows(data.value && data.value.se, SE_LABEL))
-const mrTotal = computed(() => mrRows.value.reduce((s, r) => s + r.count, 0))
-const seTotal = computed(() => seRows.value.reduce((s, r) => s + r.count, 0))
-const empty = computed(() => !loading.value && !mrRows.value.length && !seRows.value.length)
 
 async function load() {
   loading.value = true
@@ -46,7 +54,7 @@ onMounted(load)
     <div class="card row between">
       <div>
         <div style="font-weight: 700">{{ app.settings.company }}</div>
-        <div class="tiny muted">{{ t('report.period') }}</div>
+        <div class="tiny muted">{{ t('report.period') }} · {{ t('report.tapHint') }}</div>
       </div>
       <button class="btn sm" :disabled="loading" @click="load"><Icon name="refresh" /></button>
     </div>
@@ -55,23 +63,22 @@ onMounted(load)
     <div v-else-if="empty" class="empty"><div class="big"><Icon name="report" /></div>{{ t('report.none') }}</div>
 
     <template v-else>
-      <div class="section-title">{{ t('report.mrGroup') }} · {{ mrTotal }}</div>
-      <div class="card" v-if="mrRows.length">
-        <div v-for="(r, i) in mrRows" :key="i" class="item-line">
-          <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }"><Icon :name="r.icon" /></span>
-          <div class="grow truncate">{{ r.label }}</div>
-          <div style="font-weight: 800; font-size: 18px">{{ r.count }}</div>
+      <template v-for="g in groups" :key="g.title">
+        <div class="section-title">{{ t(g.title) }} · {{ g.total }}</div>
+        <div class="card">
+          <div v-for="r in g.rows" :key="r.key" class="item-line report-row" @click="open(r)">
+            <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }"><Icon :name="r.icon" /></span>
+            <div class="grow truncate">{{ r.label }}</div>
+            <div style="font-weight: 800; font-size: 18px">{{ r.count }}</div>
+            <span class="chev">›</span>
+          </div>
         </div>
-      </div>
-
-      <div class="section-title">{{ t('report.seGroup') }} · {{ seTotal }}</div>
-      <div class="card" v-if="seRows.length">
-        <div v-for="(r, i) in seRows" :key="i" class="item-line">
-          <span class="lead-icon" :style="{ background: r.color, width: '34px', height: '34px', fontSize: '17px' }"><Icon :name="r.icon" /></span>
-          <div class="grow truncate">{{ r.label }}</div>
-          <div style="font-weight: 800; font-size: 18px">{{ r.count }}</div>
-        </div>
-      </div>
+      </template>
     </template>
   </div>
 </template>
+
+<style scoped>
+.report-row { cursor: pointer; }
+.chev { color: var(--muted); font-size: 20px; margin-left: 6px; }
+</style>

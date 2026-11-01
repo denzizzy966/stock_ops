@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
 import { useApp } from '../stores/app'
 import { useMaster } from '../stores/master'
 import { useI18n } from '../lib/i18n'
-import { getServerDoc, submitTransaction, applyWorkflowAction } from '../lib/service'
+import { getServerDoc, getAttachment, submitTransaction, applyWorkflowAction } from '../lib/service'
 import { docTypeCfg, serverTypeKey } from '../data/mock'
 import AppBar from '../components/AppBar.vue'
 import { stripHtml, isNegativeStockError } from '../lib/util'
@@ -69,11 +69,32 @@ function wfClass(state) {
   return { pending: state === 'Pending Approval', approved: state === 'Approved', rejected: state === 'Rejected' }
 }
 
+// Foto lampiran: diambil sebagai Blob lewat endpoint ber-auth (file private + token APK).
+const photos = ref([]) // { name, file_name, url, failed }
+const viewing = ref(null)
+function releasePhotos() {
+  photos.value.forEach((p) => p.url && URL.revokeObjectURL(p.url))
+  photos.value = []
+}
+async function loadPhotos(files) {
+  releasePhotos()
+  photos.value = files.filter((f) => f.is_image).map((f) => ({ name: f.name, file_name: f.file_name, url: '', failed: false }))
+  for (const p of photos.value) {
+    try {
+      p.url = URL.createObjectURL(await getAttachment(p.name))
+    } catch {
+      p.failed = true
+    }
+  }
+}
+const otherFiles = computed(() => (doc.value ? (doc.value.attachments || []).filter((f) => !f.is_image) : []))
+
 async function load() {
   loading.value = true
   error.value = ''
   try {
     doc.value = await getServerDoc(doctype.value, name.value)
+    loadPhotos(doc.value.attachments || [])
   } catch (e) {
     error.value = e && e.message ? e.message : String(e)
   } finally {
@@ -81,6 +102,7 @@ async function load() {
   }
 }
 onMounted(load)
+onBeforeUnmount(releasePhotos)
 </script>
 
 <template>
@@ -154,6 +176,17 @@ onMounted(load)
         </div>
       </div>
 
+      <div v-if="photos.length || otherFiles.length" class="card mt12">
+        <div style="font-weight: 700; margin-bottom: 10px">{{ t('form.photos') }} ({{ photos.length }})</div>
+        <div class="photo-grid">
+          <div v-for="p in photos" :key="p.name" class="ph" @click="p.url && (viewing = p)">
+            <img v-if="p.url" :src="p.url" :alt="p.file_name" />
+            <span v-else class="ph-state"><Icon :name="p.failed ? 'warning' : 'loading'" :spin="!p.failed" /></span>
+          </div>
+        </div>
+        <div v-for="f in otherFiles" :key="f.name" class="tiny muted mt8 truncate"><Icon name="note" /> {{ f.file_name }}</div>
+      </div>
+
       <div v-if="doc.workflow_state === 'Pending Approval'" class="card mt12 tiny muted" style="text-align: center">
         {{ t('approval.waiting') }}
       </div>
@@ -169,6 +202,10 @@ onMounted(load)
       <div style="height: 8px"></div>
     </template>
   </div>
+  <div v-if="viewing" class="photo-viewer" @click="viewing = null">
+    <img :src="viewing.url" :alt="viewing.file_name" />
+    <button class="pv-close" :aria-label="t('common.back')"><Icon name="close" /></button>
+  </div>
 </template>
 
 <style scoped>
@@ -183,6 +220,17 @@ onMounted(load)
 .opn-qty { text-align: right; flex: none; }
 .diff-plus { color: #16a34a; font-weight: 700; }
 .diff-minus { color: var(--danger); font-weight: 700; }
+.ph-state { display: grid; place-items: center; width: 100%; height: 100%; color: var(--muted); font-size: 20px; }
+.photo-grid .ph { cursor: zoom-in; }
+.photo-viewer {
+  position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, 0.88);
+  display: grid; place-items: center; padding: 16px;
+}
+.photo-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+.pv-close {
+  position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 50%; border: 0;
+  background: rgba(255, 255, 255, 0.18); color: #fff; font-size: 18px; display: grid; place-items: center;
+}
 .desk-link {
   display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--brand);
   text-decoration: none; padding: 7px 12px; border: 1px solid var(--brand); border-radius: 8px;

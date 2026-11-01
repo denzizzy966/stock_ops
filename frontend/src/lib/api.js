@@ -79,6 +79,14 @@ export async function call(method, params = {}, { post = false } = {}) {
   return json ? json.message : null
 }
 
+// Whitelisted method yang mengembalikan file (response type "download") → Blob.
+export async function fetchBlob(method, params = {}) {
+  const qs = new URLSearchParams(params).toString()
+  const res = await fetch(`${apiBase()}/api/method/${method}${qs ? `?${qs}` : ''}`, { headers: authHeaders(false) })
+  if (!res.ok) await handle(res) // lempar ApiError dengan pesan server
+  return res.blob()
+}
+
 // List dokumen via resource API.
 export async function list(doctype, { fields, filters, limit = 0, order_by, parent } = {}) {
   const qs = new URLSearchParams()

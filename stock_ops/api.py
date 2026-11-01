@@ -1421,16 +1421,8 @@ def apply_workflow_action(doctype, name, action, note=None):
 @frappe.whitelist()
 def get_server_doc(doctype, name):
 	"""Detail dokumen server untuk ditampilkan DI aplikasi (Daftar > Server), tanpa membuka Desk.
-
-	Lingkup sama dengan list_recent: perusahaan dalam lingkup user; staf (dibatasi, bukan manajer)
-	hanya dokumen miliknya atau yang ia setujui."""
-	if doctype not in ALLOWED_DOCTYPES:
-		frappe.throw(_("Doctype tidak diizinkan: {0}").format(doctype))
-	doc = frappe.get_doc(doctype, name)
-	_assert_company_allowed(doc.company)
-	user = frappe.session.user
-	if _allowed_companies() and not _is_manager() and user not in (doc.owner, doc.get("stock_ops_approver")):
-		frappe.throw(_("Anda tidak berwenang melihat dokumen ini."), frappe.PermissionError)
+	Lingkup: lihat _get_viewable_doc. Termasuk daftar lampiran (foto)."""
+	doc = _get_viewable_doc(doctype, name)
 
 	items = doc.get("items") or []
 	first = items[0] if items else frappe._dict()
@@ -1477,7 +1469,52 @@ def get_server_doc(doctype, name):
 		],
 		"can_submit": bool(doc.docstatus == 0 and frappe.has_permission(doctype, "submit", doc)),
 		"approver_preview": _approver_preview(doc),
+		"attachments": _doc_attachments(doc),
 	}
+
+
+def _get_viewable_doc(doctype, name):
+	"""Dokumen yang boleh dilihat user di aplikasi (lingkup sama dengan list_recent): perusahaan dalam
+	lingkup user; staf (dibatasi, bukan manajer) hanya dokumen miliknya atau yang ia setujui."""
+	if doctype not in ALLOWED_DOCTYPES:
+		frappe.throw(_("Doctype tidak diizinkan: {0}").format(doctype))
+	doc = frappe.get_doc(doctype, name)
+	_assert_company_allowed(doc.company)
+	user = frappe.session.user
+	if _allowed_companies() and not _is_manager() and user not in (doc.owner, doc.get("stock_ops_approver")):
+		frappe.throw(_("Anda tidak berwenang melihat dokumen ini."), frappe.PermissionError)
+	return doc
+
+
+IMAGE_EXTS = (".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic")
+
+
+def _doc_attachments(doc):
+	files = frappe.get_all(
+		"File",
+		filters={"attached_to_doctype": doc.doctype, "attached_to_name": doc.name, "is_folder": 0},
+		fields=["name", "file_name", "is_private"],
+		order_by="creation asc",
+	)
+	for f in files:
+		f["is_image"] = (f.file_name or "").lower().endswith(IMAGE_EXTS)
+	return files
+
+
+@frappe.whitelist()
+def get_attachment(file):
+	"""Isi lampiran dokumen (foto) untuk ditampilkan di aplikasi. Lewat endpoint ini — bukan URL
+	/private/files langsung — karena (1) APK memakai token yang tak terkirim oleh <img src>, dan
+	(2) aksesnya mengikuti lingkup dokumen di aplikasi, bukan izin File di Desk."""
+	f = frappe.get_doc("File", file)
+	if f.is_folder or not f.attached_to_doctype or not f.attached_to_name:
+		frappe.throw(_("Lampiran tidak ditemukan."), frappe.DoesNotExistError)
+	_get_viewable_doc(f.attached_to_doctype, f.attached_to_name)
+	frappe.local.response.filename = f.file_name
+	# Baca bytes langsung — File.get_content() mendekode biner jadi str (merusak JPEG).
+	with open(f.get_full_path(), "rb") as fh:
+		frappe.local.response.filecontent = fh.read()
+	frappe.local.response.type = "download"
 
 
 def _approver_preview(doc):
@@ -1636,89 +1673,103 @@ def search_users(txt=None, limit=20):
 	)
 
 
-@frappe.whitelist()
-def list_recent(company=None, limit=20):
-	"""Dokumen terbaru dari server (MR + Stock Entry) — untuk tab 'Server' di Daftar."""
-	limit = int(limit)
-	out = []
+# Jenis dokumen app (DOC_TYPES di PWA) → (doctype, filter tambahan). Dipakai filter Daftar > Server
+# dan drill-down Laporan.
+LIST_TYPES = {
+	"MR": ("Material Request", {"material_request_type": "Material Transfer"}),
+	"PR": ("Material Request", {"material_request_type": "Purchase"}),
+	"SE_IN": ("Stock Entry", {"stock_entry_type": "Material Receipt"}),
+	"SE_OUT": ("Stock Entry", {"stock_entry_type": "Material Issue"}),
+	"SE_TRANSFER": ("Stock Entry", {"stock_entry_type": "Material Transfer"}),
+	"GRN": ("Purchase Receipt", {"is_return": 0}),
+	"RET": ("Purchase Receipt", {"is_return": 1}),
+	"OPN": ("Stock Reconciliation", {}),
+}
+LIST_DATE_FIELD = {"Material Request": "transaction_date"}  # lainnya posting_date
+
+
+def _list_base_filters(company=None):
+	"""Filter lingkup Daftar/Laporan: perusahaan dijepit ke lingkup user; staf (dibatasi, bukan
+	manajer) hanya dokumen miliknya — jumlah di Laporan = isi Daftar saat di-drill-down."""
 	base = {}
 	co = _company_filter(company)
 	if co:
 		base["company"] = co
-	# User dibatasi (staf) hanya melihat dokumen miliknya; manajer melihat seluruh lingkupnya.
 	if _allowed_companies() and not _is_manager():
 		base["owner"] = frappe.session.user
-	mr_filters = dict(base)
-	se_filters = dict(base)
+	return base
 
-	mr_fields = ["name", "material_request_type as subtype", "transaction_date as date", "status", "docstatus", "modified"]
+
+@frappe.whitelist()
+def list_recent(company=None, limit=20, doc_type=None, txt=None, start=0, from_date=None):
+	"""Dokumen server (MR, Stock Entry, Purchase Receipt, Opname) terbaru dulu — tab 'Server' di Daftar.
+
+	doc_type: kunci jenis app (LIST_TYPES) · txt: cari nomor dokumen · from_date: tanggal dokumen >=
+	· start/limit: halaman (gabungan semua doctype diurutkan `modified`)."""
+	limit = min(cint(limit) or 20, 100)
+	start = max(cint(start), 0)
+	if doc_type and doc_type not in LIST_TYPES:
+		frappe.throw(_("Jenis dokumen tidak dikenal: {0}").format(doc_type))
+	base = _list_base_filters(company)
+	txt = (txt or "").strip()
+	if txt:
+		base["name"] = ["like", f"%{txt}%"]
+
+	# Kelompokkan per doctype: satu query per doctype (bukan per jenis).
+	wanted = {}
+	for key, (dt, extra) in LIST_TYPES.items():
+		if doc_type and key != doc_type:
+			continue
+		wanted.setdefault(dt, []).append(extra)
+
+	fields_for = {
+		"Material Request": ["name", "material_request_type as subtype", "transaction_date as date", "status", "docstatus", "modified"],
+		"Stock Entry": ["name", "stock_entry_type as subtype", "posting_date as date", "docstatus", "modified"],
+		"Purchase Receipt": ["name", "supplier as subtype", "is_return", "posting_date as date", "status", "docstatus", "modified"],
+		"Stock Reconciliation": ["name", "purpose as subtype", "posting_date as date", "docstatus", "modified"],
+	}
 	if frappe.get_meta("Material Request").get_field("workflow_state"):
-		mr_fields.append("workflow_state")
-	for d in frappe.get_all(
-		"Material Request",
-		filters=mr_filters,
-		fields=mr_fields,
-		order_by="modified desc",
-		limit_page_length=limit,
-	):
-		out.append({"doctype": "Material Request", **d})
+		fields_for["Material Request"].append("workflow_state")
 
-	for d in frappe.get_all(
-		"Stock Entry",
-		filters=se_filters,
-		fields=["name", "stock_entry_type as subtype", "posting_date as date", "docstatus", "modified"],
-		order_by="modified desc",
-		limit_page_length=limit,
-	):
-		out.append({"doctype": "Stock Entry", "status": None, **d})
-
-	for d in frappe.get_all(
-		"Purchase Receipt",
-		filters=dict(base),
-		fields=["name", "supplier as subtype", "is_return", "posting_date as date", "status", "docstatus", "modified"],
-		order_by="modified desc",
-		limit_page_length=limit,
-	):
-		out.append({"doctype": "Purchase Receipt", **d})
-
-	for d in frappe.get_all(
-		"Stock Reconciliation",
-		filters=dict(base),
-		fields=["name", "purpose as subtype", "posting_date as date", "docstatus", "modified"],
-		order_by="modified desc",
-		limit_page_length=limit,
-	):
-		out.append({"doctype": "Stock Reconciliation", "status": None, **d})
+	out = []
+	for dt, extras in wanted.items():
+		filters = dict(base)
+		if len(extras) == 1:
+			filters.update(extras[0])  # satu jenis dipilih; semua jenis → tanpa filter subtipe
+		if from_date:
+			filters[LIST_DATE_FIELD.get(dt, "posting_date")] = [">=", from_date]
+		for d in frappe.get_all(dt, filters=filters, fields=fields_for[dt], order_by="modified desc", limit_page_length=start + limit):
+			out.append({"doctype": dt, "status": d.pop("status", None), **d})
 
 	out.sort(key=lambda x: x.get("modified") or "", reverse=True)
-	for d in out:
+	page = out[start : start + limit]
+	for d in page:
 		d.pop("modified", None)
-	return out[:limit]
+	return page
 
 
 @frappe.whitelist()
 def report_counts(company=None):
-	"""Ringkasan jumlah dokumen bulan berjalan, per subtipe."""
+	"""Ringkasan jumlah dokumen bulan berjalan per jenis app (kunci LIST_TYPES) — tiap baris bisa
+	di-drill-down ke Daftar > Server dengan filter yang sama."""
 	from frappe.utils import get_first_day, nowdate
 
 	start = str(get_first_day(nowdate()))
-	mr_cond = {"transaction_date": [">=", start]}
-	se_cond = {"posting_date": [">=", start]}
-	co = _company_filter(company)
-	if co:
-		mr_cond["company"] = co
-		se_cond["company"] = co
-
-	res = {"period": start, "mr": {}, "se": {}}
-	for tp in ("Material Transfer", "Purchase"):
-		c = frappe.db.count("Material Request", {**mr_cond, "material_request_type": tp})
+	base = _list_base_filters(company)
+	counts = {}
+	for key, (dt, extra) in LIST_TYPES.items():
+		c = frappe.db.count(dt, {**base, **extra, LIST_DATE_FIELD.get(dt, "posting_date"): [">=", start]})
 		if c:
-			res["mr"][tp] = c
-	for tp in ("Material Receipt", "Material Issue", "Material Transfer"):
-		c = frappe.db.count("Stock Entry", {**se_cond, "stock_entry_type": tp})
-		if c:
-			res["se"][tp] = c
-	return res
+			counts[key] = c
+	# Bentuk lama (mr/se per subtipe) dipertahankan untuk klien lama (APK Flutter).
+	legacy_mr = {"MR": "Material Transfer", "PR": "Purchase"}
+	legacy_se = {"SE_IN": "Material Receipt", "SE_OUT": "Material Issue", "SE_TRANSFER": "Material Transfer"}
+	return {
+		"period": start,
+		"counts": counts,
+		"mr": {v: counts[k] for k, v in legacy_mr.items() if k in counts},
+		"se": {v: counts[k] for k, v in legacy_se.items() if k in counts},
+	}
 
 
 @frappe.whitelist()

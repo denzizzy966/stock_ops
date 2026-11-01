@@ -15,7 +15,8 @@ const router = useRouter()
 const { t } = useI18n()
 
 const outbox = computed(() => docs.outbox)
-const synced = computed(() => docs.docs.filter((d) => d.status === 'synced'))
+const synced = computed(() => docs.sorted.filter((d) => d.status === 'synced'))
+const SYNCED_SHOWN = 10
 </script>
 
 <template>
@@ -69,5 +70,27 @@ const synced = computed(() => docs.docs.filter((d) => d.status === 'synced'))
         {{ t('sync.sync') }}
       </button>
     </div>
+
+    <!-- Sudah terkirim: buka detail (status server, item, foto) — daftar lengkap di Daftar Dokumen. -->
+    <template v-if="synced.length">
+      <div class="section-title row between">
+        <span>{{ t('sync.syncedList') }} ({{ synced.length }})</span>
+        <router-link :to="{ name: 'docs', query: { status: 'synced' } }" class="small">{{ t('common.viewAll') }}</router-link>
+      </div>
+      <div
+        v-for="d in synced.slice(0, SYNCED_SHOWN)"
+        :key="d.localId"
+        class="list-item"
+        style="cursor: pointer; margin-bottom: 10px"
+        @click="router.push(`/doc/${d.localId}`)"
+      >
+        <span class="lead-icon" :style="{ background: DOC_TYPES[d.type].color }"><Icon :name="DOC_TYPES[d.type].icon" /></span>
+        <div class="grow" style="min-width: 0">
+          <div class="truncate" style="font-weight: 600">{{ d.remoteName || t('docType.' + d.type) }}</div>
+          <div class="tiny muted truncate">{{ t('docType.' + d.type) }} · {{ d.items.length }} {{ t('common.items') }} · {{ fmtDateTime(d.createdAt) }}</div>
+        </div>
+        <StatusBadge :status="d.status" :submitted="d.submitted" />
+      </div>
+    </template>
   </div>
 </template>

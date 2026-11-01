@@ -79,7 +79,7 @@ const messages = {
       vCustomer: 'Pilih atau isi customer',
       companyFromAccount: 'Mengikuti perusahaan akun Anda',
       sourceWh: 'Gudang Asal', targetWh: 'Gudang Tujuan', noItems: 'Belum ada item',
-      totalQty: 'Total Qty', photos: 'Foto Barang', addPhoto: 'Tambah foto',
+      totalQty: 'Total Qty', photos: 'Foto Barang', addPhoto: 'Tambah foto', photoCamera: 'Kamera', photoGallery: 'Galeri',
       processing: 'Memproses…', notePlaceholder: 'Keterangan (opsional)',
       photoHint: 'Foto di-upload ke attachment dokumen ({vis}) saat sync.',
       offlineHint: 'Offline — tersimpan di Outbox & disinkron otomatis saat online.',
@@ -97,7 +97,10 @@ const messages = {
       vRejWh: 'Pilih gudang tolak (ada qty ditolak)', vAssetLoc: 'Pilih lokasi aset (ada item aset)',
       insufficientStock: 'Stok tidak cukup — butuh {need} {uom}, tersedia {avail} {uom}'
     },
-    list: { title: 'Daftar Dokumen', empty: 'Tidak ada dokumen pada filter ini', local: 'Lokal', server: 'Server', openErp: 'Buka di ERPNext' },
+    list: {
+      title: 'Daftar Dokumen', empty: 'Tidak ada dokumen pada filter ini', local: 'Lokal', server: 'Server', openErp: 'Buka di ERPNext',
+      searchNo: 'Cari nomor dokumen…', since: 'Sejak {d}', loadMore: 'Muat lagi'
+    },
     detail: {
       localId: 'Local ID', created: 'Dibuat', error: 'Error', syncNow: 'Sync sekarang',
       syncing: 'Menyinkron…', offlineCantSync: 'Offline — tidak bisa sync',
@@ -106,6 +109,7 @@ const messages = {
     },
     report: {
       title: 'Laporan', period: 'Bulan ini', mrGroup: 'Permintaan Barang', seGroup: 'Stok Barang',
+      receiptGroup: 'Penerimaan, Retur & Opname', tapHint: 'ketuk untuk lihat dokumen',
       none: 'Belum ada data bulan ini', total: 'Total'
     },
     balance: {
@@ -145,7 +149,7 @@ const messages = {
     sync: {
       title: 'Sync / Outbox', waiting: '{n} menunggu', syncedN: '{n} tersinkron',
       syncAll: 'Sync semua', autoSync: 'Auto-sync', autoSyncDesc: 'Kirim otomatis saat online',
-      outbox: 'Outbox', allSynced: 'Semua sudah tersinkron', sync: 'Sync'
+      outbox: 'Outbox', allSynced: 'Semua sudah tersinkron', sync: 'Sync', syncedList: 'Sudah tersinkron'
     },
     settings: {
       title: 'Pengaturan', defaults: 'Default Transaksi', companyDefault: 'Perusahaan default',
@@ -265,7 +269,7 @@ const messages = {
       vCustomer: 'Select or enter a customer',
       companyFromAccount: 'Follows your account company',
       sourceWh: 'Source Warehouse', targetWh: 'Target Warehouse', noItems: 'No items yet',
-      totalQty: 'Total Qty', photos: 'Item Photos', addPhoto: 'Add photo',
+      totalQty: 'Total Qty', photos: 'Item Photos', addPhoto: 'Add photo', photoCamera: 'Camera', photoGallery: 'Gallery',
       processing: 'Processing…', notePlaceholder: 'Remark (optional)',
       photoHint: 'Photos are uploaded to the document attachment ({vis}) on sync.',
       offlineHint: 'Offline — saved to Outbox & auto-synced when online.',
@@ -283,7 +287,10 @@ const messages = {
       vRejWh: 'Select rejected warehouse (some qty rejected)', vAssetLoc: 'Select asset location (asset items present)',
       insufficientStock: 'Not enough stock — needs {need} {uom}, {avail} {uom} available'
     },
-    list: { title: 'Documents', empty: 'No documents for this filter', local: 'Local', server: 'Server', openErp: 'Open in ERPNext' },
+    list: {
+      title: 'Documents', empty: 'No documents for this filter', local: 'Local', server: 'Server', openErp: 'Open in ERPNext',
+      searchNo: 'Search document number…', since: 'Since {d}', loadMore: 'Load more'
+    },
     detail: {
       localId: 'Local ID', created: 'Created', error: 'Error', syncNow: 'Sync now',
       syncing: 'Syncing…', offlineCantSync: 'Offline — cannot sync',
@@ -292,6 +299,7 @@ const messages = {
     },
     report: {
       title: 'Reports', period: 'This month', mrGroup: 'Material Requests', seGroup: 'Stock Entries',
+      receiptGroup: 'Receipts, Returns & Stock Counts', tapHint: 'tap to view documents',
       none: 'No data this month yet', total: 'Total'
     },
     balance: {
@@ -331,7 +339,7 @@ const messages = {
     sync: {
       title: 'Sync / Outbox', waiting: '{n} waiting', syncedN: '{n} synced',
       syncAll: 'Sync all', autoSync: 'Auto-sync', autoSyncDesc: 'Send automatically when online',
-      outbox: 'Outbox', allSynced: 'Everything is synced', sync: 'Sync'
+      outbox: 'Outbox', allSynced: 'Everything is synced', sync: 'Sync', syncedList: 'Synced'
     },
     settings: {
       title: 'Settings', defaults: 'Transaction Defaults', companyDefault: 'Default company',

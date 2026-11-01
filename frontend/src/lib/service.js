@@ -1,4 +1,4 @@
-import { call, uploadFile } from './api'
+import { call, fetchBlob, uploadFile } from './api'
 import { setServerUrl, setToken } from './platform'
 
 // Login app native: user/password → session → tukar jadi api token (disimpan).
@@ -42,8 +42,14 @@ export const cancelTransaction = (doctype, name) =>
   call('stock_ops.api.cancel_transaction', { doctype, name }, { post: true })
 
 // Dokumen terbaru dari server
-export const listRecent = (company, limit = 20) =>
-  call('stock_ops.api.list_recent', { company, limit })
+// opts: { limit, start, doc_type (kunci DOC_TYPES), txt (nomor dokumen), from_date }
+export const listRecent = (company, opts = {}) => {
+  const p = { company, limit: opts.limit || 20 }
+  for (const k of ['start', 'doc_type', 'txt', 'from_date']) {
+    if (opts[k]) p[k] = opts[k]
+  }
+  return call('stock_ops.api.list_recent', p)
+}
 
 // Ringkasan jumlah dokumen bulan ini
 export const reportCounts = (company) => call('stock_ops.api.report_counts', { company })
@@ -116,6 +122,9 @@ export const getApprovalDetail = (name) => call('stock_ops.api.get_approval_deta
 export const getDocState = (doctype, name) => call('stock_ops.api.get_doc_state', { doctype, name })
 // Detail dokumen server untuk ditampilkan di aplikasi (Daftar > Server)
 export const getServerDoc = (doctype, name) => call('stock_ops.api.get_server_doc', { doctype, name })
+
+// Isi lampiran (foto) dokumen server sebagai Blob — lewat endpoint ber-auth, bukan <img src> langsung.
+export const getAttachment = (file) => fetchBlob('stock_ops.api.get_attachment', { file })
 
 // Resolve kode (barcode/item_code/nama) → item_code (untuk hasil scan)
 export const resolveItem = (code) => call('stock_ops.api.resolve_item', { code })

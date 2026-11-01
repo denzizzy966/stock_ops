@@ -13,12 +13,15 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue'])
 const app = useApp()
 const { t } = useI18n()
-const fileInput = ref(null)
+// Dua input: kamera (capture → langsung buka kamera di HP) & galeri (tanpa capture → pilih
+// foto yang sudah ada). Di desktop keduanya membuka pemilih file.
+const cameraInput = ref(null)
+const galleryInput = ref(null)
 const busy = ref(false)
 const urls = reactive({}) // id -> objectURL (preview)
 
-function pick() {
-  fileInput.value?.click()
+function pick(source) {
+  ;(source === 'gallery' ? galleryInput : cameraInput).value?.click()
 }
 
 async function onFiles(e) {
@@ -66,12 +69,17 @@ onBeforeUnmount(() => {
         <img :src="urls[p.id]" alt="" />
         <button class="x" @click="remove(p.id)"><Icon name="close" /></button>
       </div>
-      <button class="photo-add" @click="pick" :disabled="busy">
+      <button class="photo-add" @click="pick('camera')" :disabled="busy">
         <span class="big"><Icon :name="busy ? 'loading' : 'camera'" :spin="busy" /></span>
-        {{ busy ? t('form.processing') : t('form.addPhoto') }}
+        {{ busy ? t('form.processing') : t('form.photoCamera') }}
+      </button>
+      <button class="photo-add" @click="pick('gallery')" :disabled="busy">
+        <span class="big"><Icon name="gallery" /></span>
+        {{ t('form.photoGallery') }}
       </button>
     </div>
-    <input ref="fileInput" type="file" accept="image/*" capture="environment" multiple hidden @change="onFiles" />
+    <input ref="cameraInput" type="file" accept="image/*" capture="environment" hidden @change="onFiles" />
+    <input ref="galleryInput" type="file" accept="image/*" multiple hidden @change="onFiles" />
     <p class="tiny muted mt8">
       {{ t('form.photoHint', { vis: app.settings.privatePhotos ? 'private' : 'public' }) }}
     </p>

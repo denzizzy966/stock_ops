@@ -1,6 +1,6 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useDocs } from '../stores/docs'
 import { useApp } from '../stores/app'
 import { useMaster } from '../stores/master'
@@ -11,19 +11,26 @@ import AppBar from '../components/AppBar.vue'
 import StatusBadge from '../components/StatusBadge.vue'
 import FilterBar from '../components/FilterBar.vue'
 import SearchSelect from '../components/SearchSelect.vue'
+import SearchInput from '../components/SearchInput.vue'
 import { fmtDateTime } from '../lib/util'
 
 const docs = useDocs()
 const app = useApp()
 const master = useMaster()
+const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 
-const scope = ref('local') // 'local' | 'server'
+// Bisa dibuka dengan filter dari luar (drill-down Laporan): /docs?scope=server&type=SE_OUT&from=2026-11-01
+const scope = ref(route.query.scope === 'server' ? 'server' : 'local') // 'local' | 'server'
 const filterType = ref('ALL')
-const filterStatus = ref('ALL')
 const statusTabs = ['ALL', 'pending', 'synced', 'error']
-const activeCount = computed(() => (filterType.value !== 'ALL' ? 1 : 0) + (filterStatus.value !== 'ALL' ? 1 : 0))
+const filterStatus = ref(statusTabs.includes(route.query.status) ? route.query.status : 'ALL')
+const activeCount = computed(() =>
+  scope.value === 'local'
+    ? (filterType.value !== 'ALL' ? 1 : 0) + (filterStatus.value !== 'ALL' ? 1 : 0)
+    : (serverType.value !== 'ALL' ? 1 : 0) + (fromDate.value ? 1 : 0)
+)
 
 const localList = computed(() =>
   docs.sorted.filter((d) => {
@@ -44,21 +51,67 @@ const listCompany = computed({
     loadServer()
   }
 })
+// Jenis yang dicakup list_recent (Penawaran tidak).
+const SERVER_TYPES = ['MR', 'PR', 'SE_IN', 'SE_OUT', 'SE_TRANSFER', 'GRN', 'RET', 'OPN']
+const PAGE = 20
+const serverType = ref(SERVER_TYPES.includes(route.query.type) ? route.query.type : 'ALL')
+const fromDate = ref(/^\d{4}-\d{2}-\d{2}$/.test(route.query.from || '') ? route.query.from : '')
+const search = ref('')
 const serverDocs = ref([])
 const loadingServer = ref(false)
+const loadingMore = ref(false)
+const hasMore = ref(false)
+let reqSeq = 0 // abaikan respons lama bila filter berganti saat request masih jalan
+
+const serverOpts = (start) => ({
+  limit: PAGE,
+  start,
+  doc_type: serverType.value !== 'ALL' ? serverType.value : undefined,
+  txt: search.value.trim() || undefined,
+  from_date: fromDate.value || undefined
+})
 async function loadServer() {
+  const seq = ++reqSeq
   loadingServer.value = true
   try {
-    serverDocs.value = await listRecent(listCompany.value, 30)
+    const rows = await listRecent(listCompany.value, serverOpts(0))
+    if (seq !== reqSeq) return
+    serverDocs.value = rows
+    hasMore.value = rows.length === PAGE
   } catch (e) {
+    if (seq !== reqSeq) return
     app.notify(e && e.message ? e.message : String(e), 'error')
     serverDocs.value = []
+    hasMore.value = false
   } finally {
-    loadingServer.value = false
+    if (seq === reqSeq) loadingServer.value = false
+  }
+}
+async function loadMore() {
+  const seq = reqSeq
+  loadingMore.value = true
+  try {
+    const rows = await listRecent(listCompany.value, serverOpts(serverDocs.value.length))
+    if (seq !== reqSeq) return
+    serverDocs.value = [...serverDocs.value, ...rows]
+    hasMore.value = rows.length === PAGE
+  } catch (e) {
+    app.notify(e && e.message ? e.message : String(e), 'error')
+  } finally {
+    loadingMore.value = false
   }
 }
 watch(scope, (s) => {
   if (s === 'server' && !serverDocs.value.length) loadServer()
+})
+watch([serverType, fromDate], () => loadServer())
+let searchTimer = null
+watch(search, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(loadServer, 400)
+})
+onMounted(() => {
+  if (scope.value === 'server') loadServer()
 })
 
 const docstatusClass = { 0: 's-pending', 1: 's-submitted', 2: 's-error' }
@@ -82,7 +135,7 @@ function openDoc(d) {
 <template>
   <AppBar :title="t('list.title')" />
   <div class="content">
-    <FilterBar :collapsible="scope === 'local'" :count="activeCount">
+    <FilterBar :count="activeCount">
       <template #bar>
         <div class="seg">
           <button :class="{ active: scope === 'local' }" @click="scope = 'local'">{{ t('list.local') }}</button>
@@ -100,6 +153,18 @@ function openDoc(d) {
           <button v-for="s in statusTabs" :key="s" class="chip" :class="{ active: filterStatus === s }" @click="filterStatus = s">
             {{ s === 'ALL' ? t('common.all') : t('status.' + s) }}
           </button>
+        </div>
+      </template>
+      <template v-else>
+        <SearchInput v-model="search" :placeholder="t('list.searchNo')" style="margin-top: 10px" />
+        <div class="chips" style="margin-top: 10px">
+          <button class="chip" :class="{ active: serverType === 'ALL' }" @click="serverType = 'ALL'">{{ t('common.all') }}</button>
+          <button v-for="k in SERVER_TYPES" :key="k" class="chip" :class="{ active: serverType === k }" @click="serverType = k">
+            <Icon :name="docTypeCfg(k).icon" /> {{ docTypeCfg(k).short }}
+          </button>
+        </div>
+        <div v-if="fromDate" class="chips" style="margin-top: 8px">
+          <button class="chip active" @click="fromDate = ''">{{ t('list.since', { d: fromDate }) }} <Icon name="close" /></button>
         </div>
       </template>
     </FilterBar>
@@ -163,6 +228,9 @@ function openDoc(d) {
           @click.stop
         ><Icon name="external" /></a>
       </div>
+      <button v-if="!loadingServer && hasMore" class="btn block mt12" :disabled="loadingMore" @click="loadMore">
+        <Icon v-if="loadingMore" name="loading" spin /> {{ loadingMore ? t('common.loading') : t('list.loadMore') }}
+      </button>
     </template>
   </div>
 </template>

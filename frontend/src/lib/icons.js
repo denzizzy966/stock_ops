@@ -22,6 +22,7 @@ import {
   faFileInvoice,
   faGear,
   faHouse,
+  faImages,
   faInbox,
   faLocationDot,
   faLock,
@@ -66,6 +67,7 @@ export const ICONS = {
   // aksi & status
   search: faMagnifyingGlass,
   camera: faCamera,
+  gallery: faImages,
   close: faXmark,
   refresh: faArrowsRotate,
   trash: faTrashCan,
