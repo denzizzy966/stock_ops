@@ -140,7 +140,7 @@ def _open_advances(employee):
 		"Employee Advance",
 		filters={"employee": employee, "docstatus": 1, "status": ["in", ["Paid", "Partly Claimed and Returned"]]},
 		fields=["name", "posting_date", "purpose", "paid_amount", "claimed_amount", "return_amount", "currency"],
-		order_by="posting_date asc",
+		order_by="posting_date asc, creation asc",  # FIFO: kasbon terlama dipotong dulu
 	)
 	out = []
 	for r in rows:
@@ -296,10 +296,11 @@ def save_hr(kind, data):
 	if is_new:
 		_notify(
 			[approver],
-			_("{0} baru dari {1}: {2}").format(_label(kind), emp.employee_name, doc.name),
+			"[{0}] {1} {2} · {3}".format(_("Perlu persetujuan"), _label(kind), doc.name, emp.employee_name),
 			_summary(kind, doc),
 			kind,
 			doc,
+			"new",
 		)
 	return {"name": doc.name, "status": doc.status}
 
@@ -401,9 +402,17 @@ def hr_action(kind, name, action, note=None):
 	doc.reload()
 
 	if action in ("Approve", "Reject") and employee_user:
-		verb = _("disetujui") if action == "Approve" else _("ditolak")
+		tag = _("Disetujui") if action == "Approve" else _("Ditolak")
 		body = _summary(kind, doc) + (f" — {_('Alasan')}: {note}" if action == "Reject" else "")
-		_notify([employee_user], _("{0} Anda {1}: {2}").format(_label(kind), verb, doc.name), body, kind, doc)
+		_notify(
+			[employee_user],
+			"[{0}] {1} {2} {3}".format(tag, _label(kind), _("Anda"), doc.name),
+			body,
+			kind,
+			doc,
+			"approved" if action == "Approve" else "rejected",
+			note,
+		)
 	return {"name": doc.name, "status": doc.status, "docstatus": doc.docstatus}
 
 
@@ -429,7 +438,69 @@ def _summary(kind, doc):
 	return " · ".join(x for x in (doc.name, doc.employee_name, money, what[:80]) if x)
 
 
-def _notify(users, subject, body, kind, doc):
+HR_EMAIL = {
+	# event: (tone, status, judul, intro)
+	"new": ("warn", "Menunggu persetujuan", "Persetujuan Anda diperlukan",
+		"<b>{employee}</b> mengajukan {what} dan menunggu keputusan Anda sebagai Expense Approver."),
+	"approved": ("success", "Disetujui · menunggu pembayaran", "{What} Anda disetujui",
+		"{What} Anda sudah <b>disetujui</b>. Pembayaran akan diproses oleh Finance."),
+	"rejected": ("danger", "Ditolak", "{What} Anda ditolak",
+		"{What} Anda <b>ditolak</b>. Lihat alasannya di bawah."),
+}
+
+
+def email_html(kind, doc, event, note=""):
+	from stock_ops.email_ui import _items_cap, date, e, money, render
+
+	tone, status, title, intro = HR_EMAIL[event]
+	what = _label(kind)
+	fmt = {"employee": e(doc.employee_name), "what": e(what.lower()), "What": e(what)}
+	approver = _approver_user(kind, doc) if event == "new" else None
+	fields = [
+		(_("Karyawan"), " · ".join(x for x in (doc.employee_name, doc.get("department")) if x)),
+		(_("Tanggal pengajuan"), date(doc.posting_date)),
+	]
+	rows, more = [], 0
+	if kind == "claim":
+		amount = doc.total_claimed_amount
+		fields += [
+			(_("Dipotong kasbon"), money(doc.total_advance_amount, doc) if flt(doc.total_advance_amount) else ""),
+			(_("Catatan"), doc.remark),
+		]
+		rows, more = _items_cap(
+			[
+				(r.expense_type, " · ".join(x for x in (date(r.expense_date), r.description if r.description != r.expense_type else "") if x), money(r.amount, doc))
+				for r in doc.expenses or []
+			]
+		)
+	else:
+		amount = doc.advance_amount
+		fields += [(_("Keperluan"), doc.purpose, True)]
+	if approver:
+		fields.append((_("Expense Approver"), frappe.utils.get_fullname(approver)))
+	return render(
+		kicker=what,
+		title=_(title).format(**fmt),
+		intro=_(intro).format(**fmt),
+		status=_(status),
+		tone=tone,
+		doc_name=doc.name,
+		company=doc.company,
+		amount=money(amount, doc),
+		amount_label=_("Total klaim") if kind == "claim" else _("Nominal kasbon"),
+		fields=fields,
+		note=note if event == "rejected" else "",
+		note_label=_("Alasan penolakan"),
+		items=rows,
+		items_more=more,
+		items_title=_("Rincian biaya"),
+		cta_url=frappe.utils.get_url(APP_URL.format(kind=kind, name=doc.name)),
+		cta_label=_("Setujui / Tolak di Stock Ops") if event == "new" else _("Lihat pengajuan"),
+		preheader=f"{_(status)} · {doc.name} · {money(amount, doc)}",
+	)
+
+
+def _notify(users, subject, body, kind, doc, event="new", note=""):
 	users = [u for u in users if u and u not in ("Guest",)]
 	if not users:
 		return
@@ -454,7 +525,7 @@ def _notify(users, subject, body, kind, doc):
 		frappe.sendmail(
 			recipients=users,
 			subject=subject,
-			message=f"<p>{frappe.utils.escape_html(body)}</p><p><a href=\"{frappe.utils.get_url(url)}\">{_('Buka di aplikasi')}</a></p>",
+			message=email_html(kind, doc, event, note),
 			reference_doctype=doc.doctype,
 			reference_name=doc.name,
 		)

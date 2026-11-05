@@ -80,6 +80,14 @@ role_home_page = {
 # ----------
 
 # add methods and filters to jinja environment
+# Layout email notifikasi (dipakai DocType Notification MR & Notification buatan sendiri).
+jinja = {
+	"methods": [
+		"stock_ops.email_ui.stock_ops_email",
+		"stock_ops.email_ui.stock_ops_mr_email",
+		"stock_ops.email_ui.stock_ops_fullname",
+	]
+}
 # jinja = {
 # 	"methods": "stock_ops.utils.jinja_methods",
 # 	"filters": "stock_ops.utils.jinja_filters"

@@ -1,0 +1,25 @@
+{#- Pesan untuk Notification "Leave Request - RMI" (Leave Application) — layout email Stock Ops.
+    Pasang: Notification → Message Type = HTML → tempel seluruh isi file ini ke Message.
+    Butuh app stock_ops (versi dengan stock_ops.email_ui) terpasang di site. -#}
+{%- set tone = "success" if doc.status == "Approved" else ("danger" if doc.status in ("Rejected", "Cancelled") else "warn") -%}
+{{ stock_ops_email(
+	kicker="Leave Request",
+	title="Pengajuan cuti perlu ditindaklanjuti" if doc.status == "Open" else "Status pengajuan cuti: " ~ doc.status,
+	intro=doc.employee_name ~ " mengajukan cuti " ~ doc.leave_type ~ ". Mohon diperiksa dan diberi keputusan.",
+	status=doc.status,
+	tone=tone,
+	doc_name=doc.name,
+	company=doc.company,
+	fields=[
+		["Karyawan", doc.employee ~ " · " ~ doc.employee_name],
+		["Jenis cuti", doc.leave_type, 1],
+		["Dari", frappe.format(doc.from_date, {"fieldtype": "Date"}), 1],
+		["Sampai", frappe.format(doc.to_date, {"fieldtype": "Date"}), 1],
+		["Jumlah hari", doc.total_leave_days, 1],
+		["Leave approver", doc.leave_approver_name or doc.leave_approver],
+		["Alasan", doc.description],
+	],
+	cta_url=frappe.utils.get_url("/hrms/leave-applications/" ~ doc.name),
+	cta_label="Check Request",
+	secondary_url=frappe.utils.get_url("/app/leave-application/" ~ doc.name),
+) }}
