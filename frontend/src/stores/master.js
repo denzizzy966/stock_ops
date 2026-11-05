@@ -3,6 +3,8 @@ import { bootstrap, getStockBalance } from '../lib/service'
 import { ITEMS, WAREHOUSES, COMPANIES, UOMS, SUPPLIERS } from '../data/mock'
 
 const LS = 'stockops.master'
+// Satu bootstrap yang sedang berjalan dipakai bersama (main.js + route guard) agar tidak dobel request.
+let inflight = null
 
 function load() {
   try {
@@ -113,7 +115,16 @@ export const useMaster = defineStore('master', {
         })
       )
     },
-    async load() {
+    load() {
+      if (!inflight) inflight = this._load().finally(() => { inflight = null })
+      return inflight
+    },
+    // Untuk route guard: tunggu master pertama kali dimuat (browser baru / habis login belum punya cache),
+    // supaya tautan langsung (mis. email "/stock_ops#/rtp/RTP-…") tidak terlempar ke Beranda.
+    ensureLoaded() {
+      return this.loadedAt ? Promise.resolve() : this.load()
+    },
+    async _load() {
       this.loading = true
       try {
         const b = await bootstrap()

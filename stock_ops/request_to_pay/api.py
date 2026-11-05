@@ -4,6 +4,7 @@
 #   1. Izin DocType (role RTP; RTP Requester hanya dokumen miliknya — if_owner).
 #   2. Lingkup company user (User Permission Company → _assert_company_allowed / _company_filter).
 #   3. Workflow: transisi hanya untuk role tahap itu (+ kondisi, + larangan self-approval di Global).
+import html
 import json
 
 import frappe
@@ -237,6 +238,8 @@ def get_rtp(name):
 	)
 	for h in history:
 		h["owner_name"] = frappe.utils.get_fullname(h.owner)
+		# Comment disimpan ter-escape/HTML ("&amp;", "<p>") → kirim teks polos; PWA menampilkannya sebagai teks.
+		h["content"] = html.unescape(frappe.utils.strip_html(h.content or "")).strip()
 	data = doc.as_dict(no_default_fields=False)
 	data["invoices"] = [
 		{k: row.get(k) for k in (*INVOICE_FIELDS, "name", "idx", "tax_amount", "net_amount")} for row in doc.invoices

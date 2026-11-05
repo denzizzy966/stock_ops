@@ -53,7 +53,7 @@ const router = createRouter({
   }
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   const app = useApp()
   if (!to.meta.public && !app.isLoggedIn) return { name: 'login' }
   if (to.name === 'login' && app.isLoggedIn) return { name: 'home' }
@@ -62,7 +62,11 @@ router.beforeEach((to) => {
     const master = useMaster()
     const key = ROUTE_MENU[to.name]
     if (key && !master.menuOn(key)) return { name: 'home' }
-    if (RTP_ROUTES.includes(to.name) && !master.rtpOn) return { name: 'home' }
+    if (RTP_ROUTES.includes(to.name)) {
+      // caps.rtp baru ada setelah bootstrap; jangan putuskan "tidak punya akses" sebelum dimuat.
+      if (!master.loadedAt && app.online) await master.ensureLoaded().catch(() => {})
+      if (!master.rtpOn) return { name: 'home' }
+    }
     if (to.name === 'create' && !CREATE_KEYS.some((k) => master.menuOn(k))) return { name: 'home' }
     if (to.name === 'form' && to.params.type && !master.menuOn(String(to.params.type).toLowerCase())) return { name: 'home' }
   }
