@@ -1,6 +1,8 @@
 # Request to Pay — pengajuan pembayaran vendor (pengganti form Jotform "REQUEST TO PAY").
 #
-# Dokumen ini HANYA menampung pengajuan + persetujuannya; tidak membuat jurnal/Payment Entry.
+# Dokumen ini HANYA menampung pengajuan + persetujuannya; tidak membuat jurnal sendiri.
+# Setelah Approved, Finance membuat Purchase Invoice dari sini (request_to_pay/accounting.py);
+# pelunasan PI (Payment Entry) mengubah status menjadi Paid secara otomatis.
 # Alur persetujuan memakai Workflow "Request to Pay Approval" (dibuat di setup/rtp.py):
 #   Draft → Pending Tax Review → Pending FAT Approval → (Pending HOD Approval) → Pending Global Approval
 #         → Approved (docstatus 1) → Paid
@@ -65,6 +67,10 @@ class RequesttoPay(Document):
 					frappe.throw(_("Baris {0}: tarif pajak harus antara 0 dan 100%.").format(row.idx))
 				if not (row.tax_id or "").strip():
 					frappe.throw(_("Baris {0}: isi Tax ID vendor (NPWP / NIK / Thai Tax ID).").format(row.idx))
+				if leaving_draft and not row.tax_type:
+					frappe.throw(_("Baris {0}: pilih jenis pajak (PPh 23 / PPh 21 / PPh 4(2)).").format(row.idx))
+			else:
+				row.tax_type = None
 			# File invoice boleh menyusul saat Draft, tapi wajib sebelum diajukan.
 			if leaving_draft and not row.invoice_file:
 				frappe.throw(_("Baris {0}: unggah file invoice sebelum diajukan.").format(row.idx))
@@ -93,6 +99,18 @@ class RequesttoPay(Document):
 
 	def on_submit(self):
 		self._state_changed()
+
+	def before_update_after_submit(self):
+		# Pengajuan yang sudah punya Purchase Invoice: "Paid" hanya dari pelunasan PI (Payment Entry),
+		# bukan tombol "Mark as Paid" — supaya status tidak berbeda dengan buku besar.
+		if (
+			self.has_value_changed("workflow_state")
+			and self.workflow_state == "Paid"
+			and any(r.purchase_invoice for r in self.invoices)
+		):
+			frappe.throw(
+				_("Pengajuan ini sudah dibuatkan Purchase Invoice; status Paid otomatis setelah Payment Entry di-submit.")
+			)
 
 	def on_update_after_submit(self):
 		if self.workflow_state == "Paid" and not self.paid_on:

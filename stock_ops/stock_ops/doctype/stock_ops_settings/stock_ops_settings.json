@@ -42,6 +42,9 @@
   "show_request_to_pay",
   "rtp_hod_skip_urgent",
   "rtp_hod_departments",
+  "rtp_pi_section",
+  "rtp_pi_item",
+  "rtp_tax_accounts",
   "override_section",
   "menu_overrides"
  ],
@@ -265,6 +268,26 @@
    "description": "Pengajuan dari departemen ini melewati HOD (setelah FAT, sebelum Global Team). Departemen bersifat per company — company tanpa baris di sini tidak memakai HOD."
   },
   {
+   "fieldname": "rtp_pi_section",
+   "fieldtype": "Section Break",
+   "label": "Request to Pay → Purchase Invoice",
+   "description": "Dipakai tombol \"Buat Purchase Invoice\" pada pengajuan yang sudah Approved. Purchase Invoice yang lunas (Payment Entry) otomatis mengubah status pengajuan menjadi Paid."
+  },
+  {
+   "fieldname": "rtp_pi_item",
+   "fieldtype": "Link",
+   "label": "Item Purchase Invoice",
+   "options": "Item",
+   "description": "Item non-stok untuk baris Purchase Invoice (mis. OTHNONE \"Others - Non Stock Item\"). Akun biaya dipilih per invoice."
+  },
+  {
+   "fieldname": "rtp_tax_accounts",
+   "fieldtype": "Table",
+   "label": "Akun Pajak Dipotong",
+   "options": "Request to Pay Tax Account",
+   "description": "Akun utang pajak per company & jenis pajak (mis. RMI · PPh 23 → 211401 Withholding Taxes). Potongan dicatat sebagai baris pajak \"Deduct\" sehingga total Purchase Invoice = total dibayar di pengajuan."
+  },
+  {
    "fieldname": "override_section",
    "fieldtype": "Section Break",
    "label": "Override per Role",
@@ -279,7 +302,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-10-25 00:00:00",
+ "modified": "2026-11-06 01:00:00",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Settings",

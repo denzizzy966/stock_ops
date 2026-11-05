@@ -270,9 +270,18 @@ after_install = "stock_ops.setup.install.after_install"
 after_migrate = "stock_ops.setup.install.after_migrate"
 
 # Push notification saat dokumen disubmit
+_RTP_ACC = "stock_ops.request_to_pay.accounting."
 doc_events = {
 	"Material Request": {"on_submit": "stock_ops.push.notify_doc_submit"},
 	"Stock Entry": {"on_submit": "stock_ops.push.notify_doc_submit"},
+	# Request to Pay → Purchase Invoice → pembayaran: status pengajuan mengikuti pelunasan PI.
+	"Payment Entry": {"on_submit": _RTP_ACC + "on_payment_entry", "on_cancel": _RTP_ACC + "on_payment_entry"},
+	"Journal Entry": {"on_submit": _RTP_ACC + "on_journal_entry", "on_cancel": _RTP_ACC + "on_journal_entry"},
+	"Purchase Invoice": {
+		"on_submit": _RTP_ACC + "on_purchase_invoice_submit",
+		"on_cancel": _RTP_ACC + "on_purchase_invoice_cancel",
+		"on_trash": _RTP_ACC + "on_purchase_invoice_cancel",
+	},
 }
 
 # Custom field ikut ter-export sebagai fixture (reproducible)

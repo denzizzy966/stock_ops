@@ -13,31 +13,152 @@
   "col_a",
   "amount",
   "tax_withheld",
+  "tax_type",
   "tax_id",
   "tax_rate",
   "tax_amount",
   "net_amount",
   "notes_section",
-  "notes"
+  "notes",
+  "accounting_section",
+  "purchase_invoice",
+  "col_b",
+  "expense_account"
  ],
  "fields": [
-  {"fieldname": "supplier", "fieldtype": "Link", "label": "Supplier", "options": "Supplier", "description": "Opsional — pilih bila vendor sudah terdaftar sebagai Supplier."},
-  {"fieldname": "vendor_name", "fieldtype": "Data", "label": "Nama Vendor", "reqd": 1, "in_list_view": 1, "columns": 3, "fetch_from": "supplier.supplier_name", "fetch_if_empty": 1},
-  {"fieldname": "invoice_no", "fieldtype": "Data", "label": "No. Invoice"},
-  {"fieldname": "invoice_file", "fieldtype": "Attach", "label": "File Invoice", "in_list_view": 1, "columns": 2},
-  {"fieldname": "col_a", "fieldtype": "Column Break"},
-  {"fieldname": "amount", "fieldtype": "Currency", "label": "Nominal Invoice", "options": "currency", "reqd": 1, "in_list_view": 1, "columns": 2},
-  {"fieldname": "tax_withheld", "fieldtype": "Check", "label": "Potong Pajak (PPh / WHT)", "default": "0", "description": "Centang bila pajak dipotong dari pembayaran (mis. PPh 23 2%, PPh 21 2,5%)."},
-  {"fieldname": "tax_id", "fieldtype": "Data", "label": "Tax ID (NPWP / NIK / Thai Tax ID)", "depends_on": "eval:doc.tax_withheld", "mandatory_depends_on": "eval:doc.tax_withheld"},
-  {"fieldname": "tax_rate", "fieldtype": "Percent", "label": "Tarif Pajak (%)", "depends_on": "eval:doc.tax_withheld", "mandatory_depends_on": "eval:doc.tax_withheld"},
-  {"fieldname": "tax_amount", "fieldtype": "Currency", "label": "Nominal Pajak", "options": "currency", "read_only": 1, "depends_on": "eval:doc.tax_withheld"},
-  {"fieldname": "net_amount", "fieldtype": "Currency", "label": "Total Dibayar", "options": "currency", "read_only": 1, "in_list_view": 1, "columns": 2},
-  {"fieldname": "notes_section", "fieldtype": "Section Break"},
-  {"fieldname": "notes", "fieldtype": "Small Text", "label": "Catatan"}
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "description": "Opsional — pilih bila vendor sudah terdaftar sebagai Supplier.",
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "vendor_name",
+   "fieldtype": "Data",
+   "label": "Nama Vendor",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 3,
+   "fetch_from": "supplier.supplier_name",
+   "fetch_if_empty": 1
+  },
+  {
+   "fieldname": "invoice_no",
+   "fieldtype": "Data",
+   "label": "No. Invoice"
+  },
+  {
+   "fieldname": "invoice_file",
+   "fieldtype": "Attach",
+   "label": "File Invoice",
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "col_a",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Nominal Invoice",
+   "options": "currency",
+   "reqd": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "tax_withheld",
+   "fieldtype": "Check",
+   "label": "Potong Pajak (PPh / WHT)",
+   "default": "0",
+   "description": "Centang bila pajak dipotong dari pembayaran (mis. PPh 23 2%, PPh 21 2,5%)."
+  },
+  {
+   "fieldname": "tax_type",
+   "fieldtype": "Select",
+   "label": "Jenis Pajak",
+   "options": "\nPPh 23\nPPh 21\nPPh 4(2)",
+   "depends_on": "eval:doc.tax_withheld",
+   "mandatory_depends_on": "eval:doc.tax_withheld",
+   "allow_on_submit": 1,
+   "description": "PPh 23 = jasa dari badan usaha · PPh 21 = perorangan · PPh 4(2) = sewa (final)."
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax ID (NPWP / NIK / Thai Tax ID)",
+   "depends_on": "eval:doc.tax_withheld",
+   "mandatory_depends_on": "eval:doc.tax_withheld"
+  },
+  {
+   "fieldname": "tax_rate",
+   "fieldtype": "Percent",
+   "label": "Tarif Pajak (%)",
+   "depends_on": "eval:doc.tax_withheld",
+   "mandatory_depends_on": "eval:doc.tax_withheld"
+  },
+  {
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "label": "Nominal Pajak",
+   "options": "currency",
+   "read_only": 1,
+   "depends_on": "eval:doc.tax_withheld"
+  },
+  {
+   "fieldname": "net_amount",
+   "fieldtype": "Currency",
+   "label": "Total Dibayar",
+   "options": "currency",
+   "read_only": 1,
+   "in_list_view": 1,
+   "columns": 2
+  },
+  {
+   "fieldname": "notes_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Catatan"
+  },
+  {
+   "fieldname": "accounting_section",
+   "fieldtype": "Section Break",
+   "label": "Akuntansi",
+   "collapsible": 1,
+   "depends_on": "eval:doc.purchase_invoice"
+  },
+  {
+   "fieldname": "purchase_invoice",
+   "fieldtype": "Link",
+   "label": "Purchase Invoice",
+   "options": "Purchase Invoice",
+   "read_only": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1
+  },
+  {
+   "fieldname": "col_b",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Akun Biaya",
+   "options": "Account",
+   "read_only": 1,
+   "no_copy": 1,
+   "allow_on_submit": 1
+  }
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-05 00:00:00",
+ "modified": "2026-11-06 01:00:00",
  "modified_by": "Administrator",
  "module": "Request to Pay",
  "name": "Request to Pay Invoice",

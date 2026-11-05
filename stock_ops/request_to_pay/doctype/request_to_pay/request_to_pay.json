@@ -282,8 +282,14 @@
   }
  ],
  "index_web_pages_for_search": 0,
- "links": [],
- "modified": "2026-11-05 00:00:00",
+ "links": [
+  {
+   "link_doctype": "Purchase Invoice",
+   "link_fieldname": "request_to_pay",
+   "group": "Akuntansi"
+  }
+ ],
+ "modified": "2026-11-06 01:00:00",
  "modified_by": "Administrator",
  "module": "Request to Pay",
  "name": "Request to Pay",

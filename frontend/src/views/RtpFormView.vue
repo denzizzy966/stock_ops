@@ -18,6 +18,13 @@ const router = useRouter()
 const { t, locale } = useI18n()
 
 const editName = computed(() => route.params.name || '')
+// Jenis pajak dipotong → akun utang pajak saat Finance membuat Purchase Invoice. Tarif awal hanya saran.
+const TAX_TYPES = ['PPh 23', 'PPh 21', 'PPh 4(2)']
+const DEFAULT_RATE = { 'PPh 23': 2, 'PPh 21': 2.5, 'PPh 4(2)': 10 }
+function setTaxType(inv, v) {
+  inv.tax_type = v || ''
+  if (v && !(Number(inv.tax_rate) > 0)) inv.tax_rate = DEFAULT_RATE[v]
+}
 const setup = ref(null)
 const loading = ref(true)
 const busy = ref('')
@@ -37,7 +44,7 @@ const doc = reactive({
 
 const blankInvoice = () => ({
   name: '', supplier: '', vendor_name: '', invoice_no: '', invoice_file: '', amount: null,
-  tax_withheld: 0, tax_id: '', tax_rate: null, notes: '', _file: null, _fileName: ''
+  tax_withheld: 0, tax_type: '', tax_id: '', tax_rate: null, notes: '', _file: null, _fileName: ''
 })
 
 const companies = computed(() => (setup.value?.companies || []).map((c) => c.name))
@@ -152,7 +159,7 @@ function validate(submit) {
     const n = i + 1
     if (!String(inv.vendor_name || '').trim()) return t('rtp.vVendor', { n })
     if (!(Number(inv.amount) > 0)) return t('rtp.vAmount', { n })
-    if (inv.tax_withheld && (!String(inv.tax_id || '').trim() || !(Number(inv.tax_rate) > 0 && Number(inv.tax_rate) < 100)))
+    if (inv.tax_withheld && (!inv.tax_type || !String(inv.tax_id || '').trim() || !(Number(inv.tax_rate) > 0 && Number(inv.tax_rate) < 100)))
       return t('rtp.vTax', { n })
     if (submit && !inv.invoice_file && !inv._file) return t('rtp.vFile', { n })
   }
@@ -167,7 +174,7 @@ const payload = () => ({
   invoices: doc.invoices.map((i) => ({
     name: i.name || undefined, supplier: i.supplier || null, vendor_name: i.vendor_name, invoice_no: i.invoice_no,
     invoice_file: i.invoice_file || null, amount: Number(i.amount) || 0, tax_withheld: i.tax_withheld ? 1 : 0,
-    tax_id: i.tax_withheld ? i.tax_id : '', tax_rate: i.tax_withheld ? Number(i.tax_rate) || 0 : 0, notes: i.notes
+    tax_type: i.tax_withheld ? i.tax_type || null : null, tax_id: i.tax_withheld ? i.tax_id : '', tax_rate: i.tax_withheld ? Number(i.tax_rate) || 0 : 0, notes: i.notes
   }))
 })
 
@@ -289,6 +296,11 @@ async function save(submit) {
           <span class="switch"><input type="checkbox" :checked="!!inv.tax_withheld" @change="inv.tax_withheld = $event.target.checked ? 1 : 0" /><span class="slider"></span></span>
         </label>
         <template v-if="inv.tax_withheld">
+          <div class="field">
+            <label>{{ t('rtp.taxType') }}</label>
+            <SearchSelect :model-value="inv.tax_type" :options="TAX_TYPES" :placeholder="t('rtp.taxType')" @update:model-value="(v) => setTaxType(inv, v)" />
+            <div class="tiny muted" style="margin-top: 4px">{{ t('rtp.taxTypeHint') }}</div>
+          </div>
           <div class="field">
             <label>{{ t('rtp.taxId') }}</label>
             <input v-model="inv.tax_id" />

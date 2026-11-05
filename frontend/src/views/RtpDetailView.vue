@@ -70,6 +70,10 @@ async function run(action) {
   }
 }
 const actionLabel = (a) => (RTP_ACTIONS[a] ? t('rtp.action.' + RTP_ACTIONS[a].key) : a)
+// Status Purchase Invoice (dibuat Finance di Desk) per baris invoice.
+const piPaid = (inv) => inv.pi_status !== 'Draft' && Number(inv.pi_outstanding) <= 0.01
+const piCls = (inv) => (inv.pi_status === 'Draft' ? 'draft' : piPaid(inv) ? 'paid' : '')
+const piLabel = (inv) => (inv.pi_status === 'Draft' ? t('rtp.piDraft') : piPaid(inv) ? t('rtp.piPaid') : t('rtp.piUnpaid'))
 const actionCls = (a) => (RTP_ACTIONS[a] ? RTP_ACTIONS[a].cls : '')
 
 // ── Pratinjau file invoice (lewat endpoint ber-izin; APK tak bisa memakai URL /private langsung) ──
@@ -147,13 +151,19 @@ const history = computed(() =>
         <div class="kv mt8">
           <div><span>{{ t('rtp.amount') }}</span><b>{{ money(inv.amount) }}</b></div>
           <template v-if="inv.tax_withheld">
-            <div><span>{{ t('rtp.taxAmount') }} ({{ inv.tax_rate }}%)</span><b>− {{ money(inv.tax_amount) }}</b></div>
+            <div><span>{{ t('rtp.taxAmount') }} ({{ inv.tax_type ? inv.tax_type + ' · ' : '' }}{{ inv.tax_rate }}%)</span><b>− {{ money(inv.tax_amount) }}</b></div>
             <div><span>Tax ID</span><b>{{ inv.tax_id }}</b></div>
           </template>
           <div><span>{{ t('rtp.net') }}</span><b>{{ money(inv.net_amount) }}</b></div>
         </div>
         <div v-if="inv.notes" class="tiny muted mt8">{{ inv.notes }}</div>
+        <div v-if="inv.purchase_invoice" class="pi-line mt8">
+          <span class="tiny muted">{{ t('rtp.pi') }}</span>
+          <b class="small">{{ inv.purchase_invoice }}</b>
+          <span class="pi-badge" :class="piCls(inv)">{{ piLabel(inv) }}</span>
+        </div>
       </div>
+      <div v-if="d.invoices.some((i) => i.purchase_invoice) && d.workflow_state === 'Approved'" class="tiny muted mt8">{{ t('rtp.piNote') }}</div>
 
       <div class="card mt12 totals">
         <div class="row between"><span>{{ t('rtp.totalInvoice') }}</span><b>{{ money(d.total_amount) }}</b></div>
@@ -218,6 +228,10 @@ const history = computed(() =>
 .totals .grand { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 8px; font-size: 16px; }
 .hist { padding: 6px 0; border-bottom: 1px solid var(--line); }
 .hist:last-child { border-bottom: 0; }
+.pi-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border-top: 1px dashed var(--line, #e5e7eb); padding-top: 8px; }
+.pi-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: #fef3c7; color: #92400e; }
+.pi-badge.paid { background: #dcfce7; color: #166534; }
+.pi-badge.draft { background: #e5e7eb; color: #374151; }
 .actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0 24px; }
 .preview-mask { position: fixed; inset: 0; z-index: 60; background: rgba(0, 0, 0, .7); display: grid; place-items: center; padding: 16px; }
 .preview-box { background: var(--card); border-radius: 14px; padding: 12px; max-width: 720px; width: 100%; max-height: 92vh; overflow: auto; }

@@ -46,7 +46,18 @@ LIST_FIELDS = [
 	"creation",
 	"modified",
 ]
-INVOICE_FIELDS = ("supplier", "vendor_name", "invoice_no", "invoice_file", "amount", "tax_withheld", "tax_id", "tax_rate", "notes")
+INVOICE_FIELDS = (
+	"supplier",
+	"vendor_name",
+	"invoice_no",
+	"invoice_file",
+	"amount",
+	"tax_withheld",
+	"tax_type",
+	"tax_id",
+	"tax_rate",
+	"notes",
+)
 HEADER_FIELDS = (
 	"company",
 	"employee",
@@ -242,8 +253,20 @@ def get_rtp(name):
 		h["content"] = html.unescape(frappe.utils.strip_html(h.content or "")).strip()
 	data = doc.as_dict(no_default_fields=False)
 	data["invoices"] = [
-		{k: row.get(k) for k in (*INVOICE_FIELDS, "name", "idx", "tax_amount", "net_amount")} for row in doc.invoices
+		{k: row.get(k) for k in (*INVOICE_FIELDS, "name", "idx", "tax_amount", "net_amount", "purchase_invoice")}
+		for row in doc.invoices
 	]
+	# Status Purchase Invoice per baris (dibuat Finance di Desk) — ditampilkan apa adanya di aplikasi.
+	from stock_ops.request_to_pay.accounting import billing_status
+
+	pis = {s["row"]: s["pi"] for s in billing_status(doc) if s["pi"]}
+	for inv in data["invoices"]:
+		pi = pis.get(inv["name"])
+		inv["pi_status"] = pi.status if pi else None
+		inv["pi_outstanding"] = pi.outstanding_amount if pi else None
+	if pis:
+		# "Mark as Paid" manual tidak berlaku lagi — Paid mengikuti pelunasan PI.
+		actions = [a for a in actions if a != "Mark as Paid"]
 	return {
 		"doc": data,
 		"actions": list(dict.fromkeys(actions)),

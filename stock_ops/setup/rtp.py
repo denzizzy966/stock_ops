@@ -74,6 +74,9 @@ def setup_request_to_pay():
 			).insert(ignore_permissions=True)
 	_grant_masters()
 	_init_setting_defaults()
+	from stock_ops.request_to_pay.accounting import ensure_custom_fields
+
+	ensure_custom_fields()
 	frappe.db.commit()
 
 
