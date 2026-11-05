@@ -109,6 +109,7 @@ def after_install():
 	setup_custom_fields()
 	setup_roles_and_permissions()
 	setup_approval_workflow()
+	_setup_rtp()
 	from stock_ops.push import ensure_vapid_keys
 
 	ensure_vapid_keys()
@@ -124,6 +125,13 @@ def after_migrate():
 	setup_custom_fields()
 	setup_roles_and_permissions()
 	setup_approval_workflow()
+	_setup_rtp()
+
+
+def _setup_rtp():
+	from stock_ops.setup.rtp import setup_request_to_pay
+
+	setup_request_to_pay()
 
 
 def setup_custom_fields():

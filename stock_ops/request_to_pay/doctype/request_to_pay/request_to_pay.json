@@ -1,0 +1,376 @@
+{
+ "actions": [],
+ "allow_attach": 1,
+ "autoname": "",
+ "creation": "2026-11-05 00:00:00",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "is_submittable": 1,
+ "track_changes": 1,
+ "title_field": "title",
+ "show_title_field_in_link": 0,
+ "search_fields": "requester_name,payment_purpose,title",
+ "field_order": [
+  "requester_section",
+  "title",
+  "company",
+  "requester",
+  "requester_name",
+  "employee",
+  "col_req",
+  "department",
+  "position",
+  "business_unit",
+  "payment_section",
+  "payment_purpose",
+  "purpose_requires_detail",
+  "purpose_detail",
+  "col_pay",
+  "urgency",
+  "payment_date",
+  "currency",
+  "invoices_section",
+  "invoices",
+  "totals_section",
+  "total_amount",
+  "col_tot",
+  "total_tax",
+  "col_tot2",
+  "total_payment",
+  "approval_section",
+  "workflow_state",
+  "requires_hod",
+  "approval_note",
+  "col_appr",
+  "paid_on",
+  "payment_reference",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "requester_section",
+   "fieldtype": "Section Break",
+   "label": "Pengaju"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Judul",
+   "hidden": 1,
+   "read_only": 1,
+   "no_copy": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "in_standard_filter": 1,
+   "remember_last_selected_value": 1
+  },
+  {
+   "fieldname": "requester",
+   "fieldtype": "Link",
+   "label": "Pengaju",
+   "options": "User",
+   "reqd": 1,
+   "read_only": 1,
+   "in_standard_filter": 1,
+   "default": "__user"
+  },
+  {
+   "fieldname": "requester_name",
+   "fieldtype": "Data",
+   "label": "Nama Pengaju",
+   "read_only": 1,
+   "fetch_from": "requester.full_name"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Karyawan",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "col_req",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Departemen",
+   "options": "Department",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "position",
+   "fieldtype": "Data",
+   "label": "Jabatan"
+  },
+  {
+   "fieldname": "business_unit",
+   "fieldtype": "Link",
+   "label": "Unit Bisnis (Cost Center)",
+   "options": "Cost Center",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Detail Pembayaran"
+  },
+  {
+   "fieldname": "payment_purpose",
+   "fieldtype": "Link",
+   "label": "Tujuan Pembayaran",
+   "options": "Request to Pay Purpose",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "purpose_requires_detail",
+   "fieldtype": "Check",
+   "label": "Tujuan Wajib Dijelaskan",
+   "hidden": 1,
+   "read_only": 1,
+   "fetch_from": "payment_purpose.is_other"
+  },
+  {
+   "fieldname": "purpose_detail",
+   "fieldtype": "Small Text",
+   "label": "Sebutkan Tujuannya",
+   "depends_on": "eval:doc.purpose_requires_detail",
+   "mandatory_depends_on": "eval:doc.purpose_requires_detail"
+  },
+  {
+   "fieldname": "col_pay",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "urgency",
+   "fieldtype": "Select",
+   "label": "Urgensi",
+   "options": "Normal\nUrgent",
+   "default": "Normal",
+   "reqd": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "payment_date",
+   "fieldtype": "Date",
+   "label": "Tanggal Pembayaran",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Mata Uang",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoices_section",
+   "fieldtype": "Section Break",
+   "label": "Invoice"
+  },
+  {
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "label": "Invoice",
+   "options": "Request to Pay Invoice",
+   "reqd": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Invoice",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_tot",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tax",
+   "fieldtype": "Currency",
+   "label": "Total Potongan Pajak",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_tot2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_payment",
+   "fieldtype": "Currency",
+   "label": "Total Dibayar",
+   "options": "currency",
+   "read_only": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "approval_section",
+   "fieldtype": "Section Break",
+   "label": "Persetujuan"
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "label": "Status",
+   "options": "Workflow State",
+   "read_only": 1,
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "requires_hod",
+   "fieldtype": "Check",
+   "label": "Perlu Persetujuan HOD",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Diisi otomatis saat disimpan (lihat aturan HOD)."
+  },
+  {
+   "fieldname": "approval_note",
+   "fieldtype": "Small Text",
+   "label": "Catatan Persetujuan",
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "description": "Alasan penolakan atau catatan approver terakhir."
+  },
+  {
+   "fieldname": "col_appr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "paid_on",
+   "fieldtype": "Date",
+   "label": "Dibayar Tanggal",
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_reference",
+   "fieldtype": "Data",
+   "label": "Referensi Pembayaran",
+   "allow_on_submit": 1,
+   "no_copy": 1,
+   "description": "No. transfer / Payment Entry."
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "options": "Request to Pay",
+   "read_only": 1,
+   "no_copy": 1,
+   "print_hide": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-05 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Request to Pay",
+ "name": "Request to Pay",
+ "naming_rule": "By script",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "role": "System Manager",
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "submit": 1,
+   "cancel": 1,
+   "amend": 1,
+   "delete": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "export": 1,
+   "share": 1
+  },
+  {
+   "role": "RTP Requester",
+   "if_owner": 1,
+   "read": 1,
+   "write": 1,
+   "create": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1
+  },
+  {
+   "role": "RTP Tax Reviewer",
+   "read": 1,
+   "write": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "RTP FAT Approver",
+   "read": 1,
+   "write": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "RTP HOD Approver",
+   "read": 1,
+   "write": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1
+  },
+  {
+   "role": "RTP Global Approver",
+   "read": 1,
+   "write": 1,
+   "submit": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "RTP Payment Processor",
+   "read": 1,
+   "write": 1,
+   "submit": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "export": 1
+  },
+  {
+   "role": "RTP Finance",
+   "read": 1,
+   "print": 1,
+   "email": 1,
+   "report": 1,
+   "export": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

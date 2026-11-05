@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "creation": "2026-11-05 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "istable": 1,
+ "field_order": ["department", "company"],
+ "fields": [
+  {"fieldname": "department", "fieldtype": "Link", "label": "Departemen", "options": "Department", "reqd": 1, "in_list_view": 1, "columns": 6},
+  {"fieldname": "company", "fieldtype": "Link", "label": "Company", "options": "Company", "read_only": 1, "in_list_view": 1, "columns": 4, "fetch_from": "department.company"}
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-05 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Request to Pay",
+ "name": "Request to Pay HOD Department",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
+}

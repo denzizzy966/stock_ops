@@ -1,0 +1,141 @@
+{
+ "charts": [],
+ "content": "[{\"id\": \"rtp_h1\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Request to Pay</b></span>\", \"col\": 12}}, {\"id\": \"rtp_s1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Siap Dibayar\", \"col\": 6}}, {\"id\": \"rtp_s2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tinjauan Pajak\", \"col\": 6}}, {\"id\": \"rtp_s3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Menunggu Persetujuan\", \"col\": 6}}, {\"id\": \"rtp_s4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Buka Aplikasi\", \"col\": 6}}, {\"id\": \"rtp_h2\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Pengajuan &amp; Konfigurasi</b></span>\", \"col\": 12}}, {\"id\": \"rtp_c1\", \"type\": \"card\", \"data\": {\"card_name\": \"Pengajuan\", \"col\": 4}}, {\"id\": \"rtp_c2\", \"type\": \"card\", \"data\": {\"card_name\": \"Konfigurasi\", \"col\": 4}}]",
+ "creation": "2026-11-05 00:00:00",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "accounting",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Pengajuan Pembayaran",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pengajuan",
+   "link_count": 2,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Request to Pay",
+   "link_count": 0,
+   "link_to": "Request to Pay",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tugas Pembayaran (ToDo)",
+   "link_count": 0,
+   "link_to": "ToDo",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Konfigurasi",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tujuan Pembayaran",
+   "link_count": 0,
+   "link_to": "Request to Pay Purpose",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Ops Settings (menu & aturan HOD)",
+   "link_count": 0,
+   "link_to": "Stock Ops Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Workflow Persetujuan",
+   "link_count": 0,
+   "link_to": "Workflow",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-11-05 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Request to Pay",
+ "name": "Pengajuan Pembayaran",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "RTP Finance"
+  },
+  {
+   "role": "RTP Payment Processor"
+  }
+ ],
+ "sequence_id": 30.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "label": "Siap Dibayar",
+   "link_to": "Request to Pay",
+   "type": "DocType",
+   "doc_view": "List",
+   "format": "{} siap dibayar",
+   "stats_filter": "[[\"Request to Pay\",\"workflow_state\",\"=\",\"Approved\"]]"
+  },
+  {
+   "color": "Orange",
+   "label": "Tinjauan Pajak",
+   "link_to": "Request to Pay",
+   "type": "DocType",
+   "doc_view": "List",
+   "format": "{} menunggu",
+   "stats_filter": "[[\"Request to Pay\",\"workflow_state\",\"=\",\"Pending Tax Review\"]]"
+  },
+  {
+   "color": "Yellow",
+   "label": "Menunggu Persetujuan",
+   "link_to": "Request to Pay",
+   "type": "DocType",
+   "doc_view": "List",
+   "format": "{} menunggu",
+   "stats_filter": "[[\"Request to Pay\",\"workflow_state\",\"in\",[\"Pending FAT Approval\",\"Pending HOD Approval\",\"Pending Global Approval\"]]]"
+  },
+  {
+   "color": "Grey",
+   "label": "Buka Aplikasi",
+   "type": "URL",
+   "url": "/stock_ops#/rtp"
+  }
+ ],
+ "title": "Pengajuan Pembayaran",
+ "type": "Workspace"
+}

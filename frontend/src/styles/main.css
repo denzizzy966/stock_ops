@@ -386,3 +386,15 @@ a { color: inherit; text-decoration: none; }
 .ico-spin { animation: ico-spin 1s linear infinite; }
 @keyframes ico-spin { to { transform: rotate(360deg); } }
 .empty .big { color: var(--muted); opacity: 0.7; }
+
+/* Request to Pay — badge status Workflow */
+.rs-draft { background: var(--brand-soft); color: var(--muted); }
+.rs-pending { background: #fef3c7; color: #92400e; }
+.rs-approved { background: #dcfce7; color: #166534; }
+.rs-paid { background: #dbeafe; color: #1e40af; }
+.rs-rejected { background: #fee2e2; color: #991b1b; }
+:root[data-theme='dark'] .rs-pending { background: #3a2a0a; color: #fcd34d; }
+:root[data-theme='dark'] .rs-approved { background: #0f2e1a; color: #86efac; }
+:root[data-theme='dark'] .rs-paid { background: #172554; color: #93c5fd; }
+:root[data-theme='dark'] .rs-rejected { background: #3b1111; color: #fca5a5; }
+.urgent-pill { display: inline-block; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 6px; background: #dc2626; color: #fff; margin-right: 4px; text-transform: uppercase; letter-spacing: .02em; }

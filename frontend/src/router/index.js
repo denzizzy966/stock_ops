@@ -14,6 +14,7 @@ const ROUTE_MENU = {
   return: 'ret',
   approvals: 'approvals'
 }
+const RTP_ROUTES = ['rtp-list', 'rtp-new', 'rtp-detail', 'rtp-edit']
 const CREATE_KEYS = ['mr', 'pr', 'se_in', 'se_out', 'se_transfer', 'grn', 'ret']
 
 const routes = [
@@ -35,6 +36,10 @@ const routes = [
   { path: '/form/:type', name: 'form', component: () => import('../views/DocFormView.vue') },
   { path: '/return', name: 'return', component: () => import('../views/ReturnFormView.vue') },
   { path: '/approvals', name: 'approvals', component: () => import('../views/ApprovalsView.vue'), meta: { tab: 'home' } },
+  { path: '/rtp', name: 'rtp-list', component: () => import('../views/RtpListView.vue'), meta: { tab: 'home' } },
+  { path: '/rtp/new', name: 'rtp-new', component: () => import('../views/RtpFormView.vue'), meta: { tab: 'home' } },
+  { path: '/rtp/:name/edit', name: 'rtp-edit', component: () => import('../views/RtpFormView.vue'), meta: { tab: 'home' } },
+  { path: '/rtp/:name', name: 'rtp-detail', component: () => import('../views/RtpDetailView.vue'), meta: { tab: 'home' } },
   { path: '/doc/:localId', name: 'detail', component: () => import('../views/DocDetailView.vue') },
   { path: '/sdoc/:doctype/:name', name: 'server-doc', component: () => import('../views/ServerDocView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' }
@@ -57,6 +62,7 @@ router.beforeEach((to) => {
     const master = useMaster()
     const key = ROUTE_MENU[to.name]
     if (key && !master.menuOn(key)) return { name: 'home' }
+    if (RTP_ROUTES.includes(to.name) && !master.rtpOn) return { name: 'home' }
     if (to.name === 'create' && !CREATE_KEYS.some((k) => master.menuOn(k))) return { name: 'home' }
     if (to.name === 'form' && to.params.type && !master.menuOn(String(to.params.type).toLowerCase())) return { name: 'home' }
   }

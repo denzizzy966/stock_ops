@@ -145,3 +145,13 @@ export const markNotificationsRead = (name) =>
   call('stock_ops.api.mark_notifications_read', name ? { name } : {}, { post: true })
 
 export { uploadFile }
+
+// ===== Request to Pay (online-only) =====
+const RTP = 'stock_ops.request_to_pay.api.'
+export const getRtpSetup = (company) => call(RTP + 'get_rtp_setup', { company })
+export const listRtp = (params) => call(RTP + 'list_rtp', params)
+export const getRtp = (name) => call(RTP + 'get_rtp', { name })
+export const saveRtp = (data, submit = 0) => call(RTP + 'save_rtp', { data, submit }, { post: true })
+export const applyRtpAction = (name, action, note, payment_reference) =>
+  call(RTP + 'apply_rtp_action', { name, action, note, payment_reference }, { post: true })
+export const getRtpFile = (name, file_url) => fetchBlob(RTP + 'get_rtp_file', { name, file_url })

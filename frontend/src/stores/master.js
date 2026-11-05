@@ -52,6 +52,9 @@ export const useMaster = defineStore('master', {
     hasData: (s) => s.items.length > 0,
     // Menu tampil? default true bila belum dimuat / tak diset di server.
     menuOn: (s) => (key) => s.menu[key] !== false,
+    // Request to Pay: menu aktif di Settings DAN user punya role RTP (caps.rtp dari server).
+    rtp: (s) => (s.caps && s.caps.rtp) || {},
+    rtpOn: (s) => s.menu.request_to_pay !== false && !!(s.caps && s.caps.rtp && s.caps.rtp.enabled),
     // Boleh cancel dokumen di server? default true bila caps belum dimuat
     // (penegakan sebenarnya tetap di server; ini hanya menyembunyikan tombol).
     canCancel: (s) => s.caps.can_cancel !== false,

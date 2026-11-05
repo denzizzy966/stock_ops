@@ -1,0 +1,36 @@
+{
+ "actions": [],
+ "autoname": "field:purpose_name",
+ "creation": "2026-11-05 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["purpose_name", "is_other", "disabled", "description"],
+ "fields": [
+  {"fieldname": "purpose_name", "fieldtype": "Data", "label": "Tujuan Pembayaran", "reqd": 1, "unique": 1, "in_list_view": 1},
+  {"fieldname": "is_other", "fieldtype": "Check", "label": "Wajib Isi Keterangan", "default": "0", "in_list_view": 1, "description": "Centang untuk tujuan \"Lainnya\": pengaju wajib menuliskan tujuan pembayarannya."},
+  {"fieldname": "disabled", "fieldtype": "Check", "label": "Nonaktif", "default": "0", "in_list_view": 1},
+  {"fieldname": "description", "fieldtype": "Small Text", "label": "Keterangan"}
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-05 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Request to Pay",
+ "name": "Request to Pay Purpose",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {"role": "System Manager", "read": 1, "write": 1, "create": 1, "delete": 1, "report": 1, "export": 1},
+  {"role": "RTP Finance", "read": 1, "write": 1, "create": 1, "report": 1, "export": 1},
+  {"role": "RTP Requester", "read": 1},
+  {"role": "RTP Tax Reviewer", "read": 1},
+  {"role": "RTP FAT Approver", "read": 1},
+  {"role": "RTP HOD Approver", "read": 1},
+  {"role": "RTP Global Approver", "read": 1},
+  {"role": "RTP Payment Processor", "read": 1}
+ ],
+ "sort_field": "purpose_name",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}

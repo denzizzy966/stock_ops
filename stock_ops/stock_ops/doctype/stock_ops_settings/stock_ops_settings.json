@@ -38,6 +38,10 @@
   "show_se_out",
   "show_se_transfer",
   "show_purchase_receipt",
+  "rtp_section",
+  "show_request_to_pay",
+  "rtp_hod_skip_urgent",
+  "rtp_hod_departments",
   "override_section",
   "menu_overrides"
  ],
@@ -233,6 +237,32 @@
    "fieldtype": "Check",
    "label": "Penerimaan Barang (Purchase Receipt)",
    "default": "1"
+  },
+  {
+   "fieldname": "rtp_section",
+   "fieldtype": "Section Break",
+   "label": "Request to Pay"
+  },
+  {
+   "fieldname": "show_request_to_pay",
+   "fieldtype": "Check",
+   "label": "Request to Pay",
+   "default": "1",
+   "description": "Menu pengajuan pembayaran vendor. Tetap hanya tampil untuk user yang punya role RTP (Requester, Tax Reviewer, FAT/HOD/Global Approver, Payment Processor, Finance)."
+  },
+  {
+   "fieldname": "rtp_hod_skip_urgent",
+   "fieldtype": "Check",
+   "label": "Urgent Lewati HOD",
+   "default": "1",
+   "description": "Pengajuan Urgent dari departemen di bawah langsung ke Global Team tanpa persetujuan HOD."
+  },
+  {
+   "fieldname": "rtp_hod_departments",
+   "fieldtype": "Table",
+   "label": "Departemen Wajib Persetujuan HOD",
+   "options": "Request to Pay HOD Department",
+   "description": "Pengajuan dari departemen ini melewati HOD (setelah FAT, sebelum Global Team). Departemen bersifat per company — company tanpa baris di sini tidak memakai HOD."
   },
   {
    "fieldname": "override_section",
