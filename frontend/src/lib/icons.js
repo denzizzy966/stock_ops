@@ -5,6 +5,7 @@ import {
   faArrowRightFromBracket,
   faEye,
   faEyeSlash,
+  faThumbtack,
   faArrowRightToBracket,
   faArrowUpRightFromSquare,
   faArrowsRotate,
@@ -49,6 +50,8 @@ import {
 export const ICONS = {
   eye: faEye,
   eyeoff: faEyeSlash,
+  pin: faThumbtack,
+  sliders: faSliders,
   // navigasi & menu
   home: faHouse,
   warehouse: faWarehouse,

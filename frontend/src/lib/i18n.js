@@ -95,7 +95,7 @@ const messages = {
     },
     home: {
       hello: 'Halo, {name}', pendingSync: 'Menunggu sync', synced: 'Tersinkron',
-      totalDocs: 'Total dokumen', quickCreate: 'Buat Dokumen', recent: 'Terbaru', menuTitle: 'Menu',
+      totalDocs: 'Total dokumen', quickCreate: 'Buat Dokumen', recent: 'Terbaru', menuTitle: 'Menu', favorites: 'Favorit', edit: 'Atur Beranda', editTitle: 'Atur Beranda', editHint: 'Ketuk pin untuk menaruh menu di Favorit (paling atas), ketuk mata untuk menyembunyikan menu yang tidak dipakai. Tersimpan di akun Anda.', editReset: 'Atur ulang', pin: 'Pin ke Favorit', unpin: 'Lepas dari Favorit', hide: 'Sembunyikan / tampilkan', moveLeft: 'Geser ke depan', hidden: 'Disembunyikan', shown: 'Ditampilkan', allHidden: 'Semua menu di bagian ini disembunyikan.', hiddenNote: '{n} menu disembunyikan', prefsSaved: 'Susunan Beranda disimpan', prefsSavedOffline: 'Disimpan di HP ini; dikirim ke akun saat online',
       emptyDocs: 'Belum ada dokumen. Tekan tombol Buat di bawah.',
       offlineBanner: 'Mode offline — transaksi tersimpan di Outbox & disinkron saat online.',
       draftLocal: 'Draft lokal',
@@ -320,7 +320,7 @@ const messages = {
     },
     home: {
       hello: 'Hi, {name}', pendingSync: 'Pending sync', synced: 'Synced',
-      totalDocs: 'Total documents', quickCreate: 'Create Document', recent: 'Recent', menuTitle: 'Menu',
+      totalDocs: 'Total documents', quickCreate: 'Create Document', recent: 'Recent', menuTitle: 'Menu', favorites: 'Favorites', edit: 'Customize home', editTitle: 'Customize home', editHint: 'Tap the pin to put a menu in Favorites (top), tap the eye to hide menus you do not use. Saved to your account.', editReset: 'Reset', pin: 'Pin to Favorites', unpin: 'Unpin', hide: 'Hide / show', moveLeft: 'Move forward', hidden: 'Hidden', shown: 'Shown', allHidden: 'Every menu in this section is hidden.', hiddenNote: '{n} menus hidden', prefsSaved: 'Home layout saved', prefsSavedOffline: 'Saved on this phone; sent to your account when online',
       emptyDocs: 'No documents yet. Tap the Create button below.',
       offlineBanner: 'Offline mode — transactions saved to Outbox & synced when online.',
       draftLocal: 'Local draft',

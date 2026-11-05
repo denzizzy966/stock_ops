@@ -28,6 +28,9 @@ export async function nativeLogin(url, usr, pwd) {
 
 // Master data (sekali panggil, untuk cache offline)
 export const bootstrap = () => call('stock_ops.api.get_bootstrap')
+// Susunan Beranda user (pin & sembunyikan) — disimpan per akun di server.
+export const saveHomePrefs = (prefs) =>
+  call('stock_ops.api.save_home_prefs', { pinned: prefs.pinned, hidden: prefs.hidden }, { post: true })
 
 // Buat dokumen draft (idempoten via external_localid)
 export const createTransaction = (payload) =>
