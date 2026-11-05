@@ -784,6 +784,8 @@ MENU_FIELDS = {
 	"se_transfer": "show_se_transfer",
 	"grn": "show_purchase_receipt",
 	"request_to_pay": "show_request_to_pay",
+	"expense_claim": "show_expense_claim",
+	"employee_advance": "show_employee_advance",
 }
 
 
@@ -839,6 +841,7 @@ def _user_caps():
 	can_cancel = is_manager or any(
 		frappe.has_permission(dt, ptype="cancel") for dt in ("Material Request", "Stock Entry")
 	)
+	from stock_ops.hr_claims import hr_caps
 	from stock_ops.request_to_pay.api import rtp_caps
 
 	return {
@@ -846,6 +849,7 @@ def _user_caps():
 		"can_cancel": bool(can_cancel),
 		"is_system_manager": _is_system_manager(),
 		"rtp": rtp_caps(),
+		"hr": hr_caps(),
 	}
 
 

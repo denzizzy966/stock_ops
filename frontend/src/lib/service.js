@@ -158,3 +158,12 @@ export const saveRtp = (data, submit = 0) => call(RTP + 'save_rtp', { data, subm
 export const applyRtpAction = (name, action, note, payment_reference) =>
   call(RTP + 'apply_rtp_action', { name, action, note, payment_reference }, { post: true })
 export const getRtpFile = (name, file_url) => fetchBlob(RTP + 'get_rtp_file', { name, file_url })
+
+// ── Menu HR (HRMS): Klaim Biaya (Expense Claim) & Kasbon (Employee Advance) ──
+const HR = 'stock_ops.hr_claims.'
+export const getHrSetup = (kind) => call(HR + 'get_hr_setup', { kind })
+export const listHr = (kind, params) => call(HR + 'list_hr', { kind, ...params })
+export const getHr = (kind, name) => call(HR + 'get_hr', { kind, name })
+export const saveHr = (kind, data) => call(HR + 'save_hr', { kind, data: JSON.stringify(data) }, { post: true })
+export const hrAction = (kind, name, action, note) => call(HR + 'hr_action', { kind, name, action, note }, { post: true })
+export const getHrFile = (kind, name, file_url) => fetchBlob(HR + 'get_hr_file', { kind, name, file_url })

@@ -8,12 +8,12 @@
  "field_order": ["role", "menu", "visible"],
  "fields": [
   {"fieldname": "role", "fieldtype": "Link", "label": "Role", "options": "Role", "reqd": 1, "in_list_view": 1, "columns": 4},
-  {"fieldname": "menu", "fieldtype": "Select", "label": "Menu", "reqd": 1, "in_list_view": 1, "columns": 4, "options": "stock_balance\nmovement\ndocuments\nnotifications\nscan\ntransfer\nlow_stock\nopname\nmr\npr\nse_in\nse_out\nse_transfer\ngrn\nrequest_to_pay"},
+  {"fieldname": "menu", "fieldtype": "Select", "label": "Menu", "reqd": 1, "in_list_view": 1, "columns": 4, "options": "stock_balance\nmovement\ndocuments\nnotifications\nscan\ntransfer\nlow_stock\nopname\nmr\npr\nse_in\nse_out\nse_transfer\ngrn\nrequest_to_pay\nexpense_claim\nemployee_advance"},
   {"fieldname": "visible", "fieldtype": "Check", "label": "Tampil", "default": "0", "in_list_view": 1, "columns": 2}
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-06-04 00:00:00",
+ "modified": "2026-11-06 02:30:00",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Menu Override",

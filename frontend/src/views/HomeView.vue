@@ -6,6 +6,7 @@ import { useDocs } from '../stores/docs'
 import { useMaster } from '../stores/master'
 import { useI18n } from '../lib/i18n'
 import { DOC_TYPE_LIST, DOC_TYPES } from '../data/mock'
+import { HR_KINDS } from '../lib/hr'
 import { getLowStock } from '../lib/service'
 import AppBar from '../components/AppBar.vue'
 import StatusBadge from '../components/StatusBadge.vue'
@@ -40,6 +41,9 @@ const tiles = computed(() => {
     out.push({ id: 'approvals', group: 'menu', icon: 'check-circle', color: '#b45309', label: t('approval.menu'), to: '/approvals', badge: master.pendingApprovals })
   if (master.rtpOn)
     out.push({ id: 'rtp', group: 'menu', icon: 'receipt', color: '#0f766e', label: t('rtp.menu'), to: '/rtp', badge: master.rtp.todo })
+  for (const [kind, k] of Object.entries(HR_KINDS))
+    if (master.hrOn(kind))
+      out.push({ id: 'hr:' + kind, group: 'menu', icon: k.icon, color: k.color, label: t('hr.menu.' + kind), to: '/hr/' + kind, badge: (master.hr[kind] || {}).todo })
   for (const ty of DOC_TYPE_LIST.filter((x) => master.menuOn(x.key.toLowerCase())))
     out.push({ id: 'create:' + ty.key, group: 'create', icon: ty.icon, color: ty.color, label: t('docType.' + ty.key), to: `/form/${ty.key}` })
   return out

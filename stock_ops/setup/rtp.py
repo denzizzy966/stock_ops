@@ -83,7 +83,13 @@ def setup_request_to_pay():
 # Field baru di Single "Stock Ops Settings" belum punya baris di tabSingles setelah migrate.
 # Saat admin menyimpan Settings, field itu ikut tersimpan 0 (Check kosong) — menu Request to Pay
 # hilang & "Urgent Lewati HOD" mati diam-diam. Maka tulis nilai default-nya sekali, bila belum ada.
-_SETTING_DEFAULTS = {"show_request_to_pay": 1, "rtp_hod_skip_urgent": 1}
+_SETTING_DEFAULTS = {
+	"show_request_to_pay": 1,
+	"rtp_hod_skip_urgent": 1,
+	# Menu HR (Klaim Biaya / Kasbon) — hanya tampil bila HRMS terpasang & user terhubung ke Employee.
+	"show_expense_claim": 1,
+	"show_employee_advance": 1,
+}
 
 
 def _init_setting_defaults():

@@ -11,8 +11,9 @@ const showTabs = computed(() => !!route.meta.tab && app.isLoggedIn)
 
 <template>
   <div class="app-shell">
-    <router-view v-slot="{ Component }">
-      <component :is="Component" />
+    <router-view v-slot="{ Component, route: r }">
+      <!-- Form HR: klaim ↔ kasbon / baru ↔ ubah memakai komponen yang sama → paksa mount ulang per URL. -->
+      <component :is="Component" :key="r.name === 'hr-new' || r.name === 'hr-edit' ? r.fullPath : undefined" />
     </router-view>
 
     <TabBar v-if="showTabs" />

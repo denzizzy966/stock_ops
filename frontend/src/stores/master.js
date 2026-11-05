@@ -61,6 +61,14 @@ export const useMaster = defineStore('master', {
     // Request to Pay: menu aktif di Settings DAN user punya role RTP (caps.rtp dari server).
     rtp: (s) => (s.caps && s.caps.rtp) || {},
     rtpOn: (s) => s.menu.request_to_pay !== false && !!(s.caps && s.caps.rtp && s.caps.rtp.enabled),
+    // Menu HR (HRMS): caps.hr dari server. Tampil bila menu aktif di Settings DAN user bisa mengajukan
+    // (terhubung ke Employee) atau menjadi approver.
+    hr: (s) => (s.caps && s.caps.hr) || {},
+    hrOn: (s) => (kind) => {
+      const h = (s.caps && s.caps.hr) || {}
+      const key = kind === 'claim' ? 'expense_claim' : 'employee_advance'
+      return !!h.enabled && s.menu[key] !== false && !!(h[kind] && (h[kind].can_request || h.can_approve))
+    },
     // Boleh cancel dokumen di server? default true bila caps belum dimuat
     // (penegakan sebenarnya tetap di server; ini hanya menyembunyikan tombol).
     canCancel: (s) => s.caps.can_cancel !== false,

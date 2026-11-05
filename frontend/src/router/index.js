@@ -15,6 +15,7 @@ const ROUTE_MENU = {
   approvals: 'approvals'
 }
 const RTP_ROUTES = ['rtp-list', 'rtp-new', 'rtp-detail', 'rtp-edit']
+const HR_ROUTES = ['hr-list', 'hr-new', 'hr-detail', 'hr-edit']
 const CREATE_KEYS = ['mr', 'pr', 'se_in', 'se_out', 'se_transfer', 'grn', 'ret']
 
 const routes = [
@@ -40,6 +41,11 @@ const routes = [
   { path: '/rtp/new', name: 'rtp-new', component: () => import('../views/RtpFormView.vue'), meta: { tab: 'home' } },
   { path: '/rtp/:name/edit', name: 'rtp-edit', component: () => import('../views/RtpFormView.vue'), meta: { tab: 'home' } },
   { path: '/rtp/:name', name: 'rtp-detail', component: () => import('../views/RtpDetailView.vue'), meta: { tab: 'home' } },
+  // Menu HR: kind = claim (Expense Claim) | advance (Employee Advance)
+  { path: '/hr/:kind(claim|advance)', name: 'hr-list', component: () => import('../views/HrListView.vue'), meta: { tab: 'home' } },
+  { path: '/hr/:kind(claim|advance)/new', name: 'hr-new', component: () => import('../views/HrFormView.vue'), meta: { tab: 'home' } },
+  { path: '/hr/:kind(claim|advance)/:name/edit', name: 'hr-edit', component: () => import('../views/HrFormView.vue'), meta: { tab: 'home' } },
+  { path: '/hr/:kind(claim|advance)/:name', name: 'hr-detail', component: () => import('../views/HrDetailView.vue'), meta: { tab: 'home' } },
   { path: '/doc/:localId', name: 'detail', component: () => import('../views/DocDetailView.vue') },
   { path: '/sdoc/:doctype/:name', name: 'server-doc', component: () => import('../views/ServerDocView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' }
@@ -66,6 +72,10 @@ router.beforeEach(async (to) => {
       // caps.rtp baru ada setelah bootstrap; jangan putuskan "tidak punya akses" sebelum dimuat.
       if (!master.loadedAt && app.online) await master.ensureLoaded().catch(() => {})
       if (!master.rtpOn) return { name: 'home' }
+    }
+    if (HR_ROUTES.includes(to.name)) {
+      if (!master.loadedAt && app.online) await master.ensureLoaded().catch(() => {})
+      if (!master.hrOn(to.params.kind)) return { name: 'home' }
     }
     if (to.name === 'create' && !CREATE_KEYS.some((k) => master.menuOn(k))) return { name: 'home' }
     if (to.name === 'form' && to.params.type && !master.menuOn(String(to.params.type).toLowerCase())) return { name: 'home' }

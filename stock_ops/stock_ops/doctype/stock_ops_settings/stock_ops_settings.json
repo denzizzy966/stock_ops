@@ -38,6 +38,9 @@
   "show_se_out",
   "show_se_transfer",
   "show_purchase_receipt",
+  "hr_section",
+  "show_expense_claim",
+  "show_employee_advance",
   "rtp_section",
   "show_request_to_pay",
   "rtp_hod_skip_urgent",
@@ -242,6 +245,24 @@
    "default": "1"
   },
   {
+   "fieldname": "hr_section",
+   "fieldtype": "Section Break",
+   "label": "Menu HR",
+   "description": "Butuh app HRMS. Menu hanya tampil untuk user yang terhubung ke data Karyawan (Employee) atau menjadi Expense Approver."
+  },
+  {
+   "fieldname": "show_expense_claim",
+   "fieldtype": "Check",
+   "label": "Klaim Biaya (Expense Claim)",
+   "default": "1"
+  },
+  {
+   "fieldname": "show_employee_advance",
+   "fieldtype": "Check",
+   "label": "Kasbon (Employee Advance)",
+   "default": "1"
+  },
+  {
    "fieldname": "rtp_section",
    "fieldtype": "Section Break",
    "label": "Request to Pay"
@@ -302,7 +323,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 01:00:00",
+ "modified": "2026-11-06 02:30:00",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Settings",
