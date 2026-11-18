@@ -357,7 +357,8 @@ def save_rtp(data, submit=0):
 			row = existing.get(inv.get("name")) if inv.get("name") else None
 			vals = {k: inv.get(k) for k in INVOICE_FIELDS if k in inv}
 			vals["tax_withheld"] = cint(vals.get("tax_withheld"))
-			if vals.get("invoice_file"):
+			# File yang sudah tersimpan di baris ini tidak perlu dicek ulang (hanya file baru / yang diganti).
+			if vals.get("invoice_file") and not (row and row.invoice_file == vals["invoice_file"]):
 				_check_file(vals["invoice_file"], doc)
 			if row:
 				row.update(vals)
@@ -377,14 +378,19 @@ def save_rtp(data, submit=0):
 
 
 def _check_file(url, doc):
-	"""File invoice harus lampiran dokumen ini (atau unggahan user ini yang belum terlampir)."""
-	f = frappe.db.get_value("File", {"file_url": url}, ["name", "attached_to_doctype", "attached_to_name", "owner"], as_dict=True)
-	if not f:
+	"""File invoice harus lampiran dokumen ini (atau unggahan user ini yang belum terlampir).
+
+	Frappe tidak menyimpan isi file kembar: unggahan ulang file yang isinya sama (mis. gambar yang sama
+	dipakai di pengajuan lain) membuat catatan File baru tetapi MEMAKAI file_url lama. Jadi satu URL bisa
+	punya banyak catatan File — cukup salah satunya milik pengajuan ini (bukan hanya catatan terbaru)."""
+	files = frappe.get_all("File", filters={"file_url": url}, fields=["attached_to_doctype", "attached_to_name", "owner"])
+	if not files:
 		frappe.throw(_("File invoice tidak ditemukan: {0}").format(url))
-	if f.attached_to_doctype == DT and f.attached_to_name == doc.name:
-		return
-	if not f.attached_to_doctype and f.owner == frappe.session.user:
-		return
+	for f in files:
+		if f.attached_to_doctype == DT and f.attached_to_name == doc.name:
+			return
+		if not f.attached_to_doctype and f.owner == frappe.session.user:
+			return
 	frappe.throw(_("File invoice bukan milik pengajuan ini: {0}").format(url), frappe.PermissionError)
 
 
