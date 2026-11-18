@@ -39,6 +39,11 @@ const messages = {
       onlineOnly: 'Menu ini butuh koneksi internet.',
       employee: 'Karyawan', approver: 'Disetujui oleh (Expense Approver)', noApprover: 'Expense Approver Anda belum diisi. Hubungi HR untuk mengisinya — pengajuan belum bisa dikirim.',
       noEmployee: 'Akun Anda belum terhubung ke data Karyawan. Hubungi HR.',
+      whyTitle: 'Tombol "{label}" belum tersedia untuk akun Anda',
+      why: {
+        no_employee: 'Akun ini belum terhubung ke data Karyawan. Minta HR membuka data Employee Anda dan mengisi kolom "User ID" dengan akun ini.',
+        no_permission: 'Akun ini belum punya hak membuat {doc}. Minta admin menambahkan role "Employee" ke akun Anda.'
+      },
       expenses: 'Rincian biaya', addExpense: 'Tambah biaya', expDate: 'Tanggal', expType: 'Jenis biaya', expDesc: 'Keterangan',
       amount: 'Nominal', remark: 'Catatan untuk approver', total: 'Total klaim', noAccount: 'jenis ini belum punya akun di company Anda — klaim bisa ditolak sistem',
       useAdvance: 'Potong dari kasbon yang belum terpakai', advanceLeft: 'Sisa kasbon {amount}',
@@ -80,6 +85,11 @@ const messages = {
       rejectTitle: 'Tolak Pengajuan', rejectReason: 'Alasan penolakan (dikirim ke pengaju)', approveTitle: 'Setujui Pengajuan',
       approveNote: 'Catatan (opsional)', paidTitle: 'Tandai Sudah Dibayar', confirm: 'Konfirmasi',
       applied: '{name}: {state}', requiresHod: 'Lewat persetujuan HOD', noActions: 'Tidak ada aksi untuk Anda di status ini.',
+      blockedTitle: 'Anda tidak bisa menyetujui pengajuan ini',
+      blocked: {
+        self_approval: 'Pengajuan ini Anda buat sendiri — tahap ini tidak boleh disetujui oleh pembuatnya. Minta pemegang role "{role}" lain untuk menyetujui.',
+        no_role: 'Tahap ini butuh role "{role}", dan akun Anda belum memilikinya. Minta admin menambahkan role tersebut (dan akses company-nya) ke akun Anda.'
+      },
       state: {
         draft: 'Draft', tax: 'Tinjauan Pajak', fat: 'Persetujuan FAT', hod: 'Persetujuan HOD', global: 'Persetujuan Global',
         approved: 'Siap Dibayar', paid: 'Sudah Dibayar', rejected: 'Ditolak'
@@ -223,6 +233,8 @@ const messages = {
       saveSettings: 'Simpan Pengaturan', syncOutbox: 'Sync / Outbox', syncOutboxDesc: 'Antrian & status sinkronisasi',
       reports: 'Laporan', reportsDesc: 'Ringkasan dokumen bulan ini',
       getApp: 'Unduh Aplikasi', downloadApk: 'Unduh Android (APK)', downloadApkDesc: 'Aplikasi native untuk Android',
+      guide: 'Panduan Penggunaan', guideWiki: 'Buka panduan (Wiki)', guideWikiDesc: 'Langkah demi langkah semua menu, bisa dibaca tanpa login',
+      guidePdf: 'Unduh panduan (PDF)', guidePdfDesc: 'Simpan untuk dibaca offline atau dicetak',
       installPwa: 'Install Web App (PWA)', installPwaDesc: 'Pasang ke layar utama perangkat',
       apkUnavailable: 'Tautan APK belum diatur di Stock Ops Settings', pwaUnavailable: 'Install belum tersedia (buka di Chrome/Android atau sudah terpasang)',
       other: 'Lainnya', backend: 'Backend (P1)', mockVersion: 'Versi mock',
@@ -289,6 +301,11 @@ const messages = {
       onlineOnly: 'This menu needs an internet connection.',
       employee: 'Employee', approver: 'Approved by (Expense Approver)', noApprover: 'Your Expense Approver is not set. Ask HR to fill it in — requests cannot be sent yet.',
       noEmployee: 'Your account is not linked to an Employee record. Contact HR.',
+      whyTitle: '"{label}" is not available for your account yet',
+      why: {
+        no_employee: 'This account is not linked to an Employee record. Ask HR to open your Employee record and set "User ID" to this account.',
+        no_permission: 'This account may not create {doc} yet. Ask an admin to add the "Employee" role to your account.'
+      },
       expenses: 'Expenses', addExpense: 'Add expense', expDate: 'Date', expType: 'Expense type', expDesc: 'Description',
       amount: 'Amount', remark: 'Note for the approver', total: 'Total claimed', noAccount: 'this type has no account for your company — the claim may be refused',
       useAdvance: 'Deduct from unused cash advance', advanceLeft: 'Advance left {amount}',
@@ -330,6 +347,11 @@ const messages = {
       rejectTitle: 'Reject Request', rejectReason: 'Rejection reason (sent to the requester)', approveTitle: 'Approve Request',
       approveNote: 'Note (optional)', paidTitle: 'Mark as Paid', confirm: 'Confirm',
       applied: '{name}: {state}', requiresHod: 'Goes through HOD approval', noActions: 'No actions for you at this status.',
+      blockedTitle: 'You cannot approve this request',
+      blocked: {
+        self_approval: 'You created this request yourself — this stage cannot be approved by its creator. Ask another "{role}" to approve it.',
+        no_role: 'This stage needs the "{role}" role, which your account does not have. Ask an admin to add the role (and its company access) to your account.'
+      },
       state: {
         draft: 'Draft', tax: 'Tax Review', fat: 'FAT Approval', hod: 'HOD Approval', global: 'Global Approval',
         approved: 'Ready to Pay', paid: 'Paid', rejected: 'Rejected'
@@ -473,6 +495,8 @@ const messages = {
       saveSettings: 'Save Settings', syncOutbox: 'Sync / Outbox', syncOutboxDesc: 'Queue & sync status',
       reports: 'Reports', reportsDesc: "This month's document summary",
       getApp: 'Get the App', downloadApk: 'Download Android (APK)', downloadApkDesc: 'Native app for Android',
+      guide: 'User Guide', guideWiki: 'Open the guide (Wiki)', guideWikiDesc: 'Step-by-step for every menu, readable without login',
+      guidePdf: 'Download the guide (PDF)', guidePdfDesc: 'Keep it for offline reading or printing',
       installPwa: 'Install Web App (PWA)', installPwaDesc: 'Add to your home screen',
       apkUnavailable: 'APK link not set in Stock Ops Settings', pwaUnavailable: 'Install not available (open in Chrome/Android or already installed)',
       other: 'Other', backend: 'Backend (P1)', mockVersion: 'Mock version',

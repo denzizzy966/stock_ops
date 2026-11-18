@@ -47,6 +47,9 @@ export const useMaster = defineStore('master', {
       userDefaults: s.userDefaults || {},
       defaultLang: s.defaultLang || 'id',
       flutterApkUrl: s.flutterApkUrl || '',
+      // Panduan (Wiki + PDF) — dari Stock Ops Settings, default Wiki halosocia.
+      tutorialUrl: s.tutorialUrl || '',
+      tutorialPdfUrl: s.tutorialPdfUrl || '',
       loadedAt: s.loadedAt || null,
       loading: false,
       // Saldo stok per gudang (transient, tak dipersist) → {warehouse: {item_code: actual_qty}}.
@@ -73,6 +76,8 @@ export const useMaster = defineStore('master', {
     // (penegakan sebenarnya tetap di server; ini hanya menyembunyikan tombol).
     canCancel: (s) => s.caps.can_cancel !== false,
     isManager: (s) => s.caps.is_manager === true,
+    // MR Purchase butuh persetujuan atasan? false bila "Lewati persetujuan atasan" di Settings (default: ya).
+    mrApproval: (s) => s.caps.mr_approval !== false,
     // Boleh buka dokumen ini di Desk? (System User + izin baca doctype dari server).
     canOpenInDesk: (s) => (doctype) => !!(s.desk && s.desk.can_access && s.desk.perms && s.desk.perms[doctype]),
     // URL Desk untuk sebuah dokumen: /app/<doctype-slug>/<name> (dibuka di tab baru).
@@ -125,6 +130,8 @@ export const useMaster = defineStore('master', {
           userDefaults: this.userDefaults,
           defaultLang: this.defaultLang,
           flutterApkUrl: this.flutterApkUrl,
+          tutorialUrl: this.tutorialUrl,
+          tutorialPdfUrl: this.tutorialPdfUrl,
           loadedAt: this.loadedAt
         })
       )
@@ -192,6 +199,8 @@ export const useMaster = defineStore('master', {
         this.userDefaults = b.user_defaults || {}
         this.defaultLang = b.default_lang || 'id'
         this.flutterApkUrl = b.flutter_apk_url || ''
+        this.tutorialUrl = b.tutorial_url || ''
+        this.tutorialPdfUrl = b.tutorial_pdf_url || ''
         this.loadedAt = new Date().toISOString()
         this.persist()
         // Terapkan bahasa default server (kecuali user sudah memilih manual)

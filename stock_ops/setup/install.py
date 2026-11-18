@@ -264,11 +264,26 @@ _WF_TRANSITIONS = [
 ]
 
 
-def setup_approval_workflow():
+def _wf_transitions():
+	"""Transisi sesuai Stock Ops Settings → "Lewati persetujuan atasan".
+
+	Dilewati: semua MR (termasuk Purchase) langsung Submit → Approved (docstatus 1). Transisi
+	Approve/Reject/Reopen tetap ada agar MR yang terlanjur Menunggu Persetujuan bisa diselesaikan.
+	Workflow-nya sendiri tetap aktif — mematikan Workflow di Desk akan dinyalakan lagi oleh migrate.
+	"""
+	from stock_ops.approval import mr_approval_required
+
+	if mr_approval_required():
+		return _WF_TRANSITIONS
+	return [("Draft", "Submit", "Approved", ROLE_USER, "")] + [t for t in _WF_TRANSITIONS if t[0] != "Draft"]
+
+
+def setup_approval_workflow(commit=True):
 	"""Buat/perbaiki Workflow persetujuan MR Purchase + notifikasi (idempoten).
 
 	Hanya aktif bila role 'Purchase Manager' ada (erpnext buying terpasang) dan
-	DocType Material Request ada.
+	DocType Material Request ada. Dipanggil juga saat Stock Ops Settings disimpan
+	(commit=False — ikut transaksi simpan Settings).
 	"""
 	if not frappe.db.exists("DocType", "Material Request"):
 		return
@@ -302,7 +317,7 @@ def setup_approval_workflow():
 
 	for state, docstatus, allow_edit, _style in _WF_STATES:
 		wf.append("states", {"state": state, "doc_status": docstatus, "allow_edit": allow_edit})
-	for from_state, action, next_state, allowed, condition in _WF_TRANSITIONS:
+	for from_state, action, next_state, allowed, condition in _wf_transitions():
 		row = wf.append(
 			"transitions",
 			{
@@ -318,7 +333,8 @@ def setup_approval_workflow():
 
 	wf.save(ignore_permissions=True)
 	_ensure_notifications()
-	frappe.db.commit()
+	if commit:
+		frappe.db.commit()
 
 
 # (name, subject, event, value_changed, condition, channel, recipient, message)
@@ -370,7 +386,8 @@ _NOTIFICATIONS = [
 		"subject": "Status permintaan {{ doc.name }}: {{ doc.workflow_state }}",
 		"event": "Value Change",
 		"value_changed": "workflow_state",
-		"condition": "doc.workflow_state in ('Approved','Rejected') and doc.material_request_type == 'Purchase'",
+		# Hanya bila ada approver — MR yang langsung Submit (persetujuan dilewati) tak perlu kabar ke pemohonnya sendiri.
+		"condition": "doc.workflow_state in ('Approved','Rejected') and doc.material_request_type == 'Purchase' and doc.stock_ops_approver",
 		"channel": "System Notification",
 		"recipient": {"receiver_by_document_field": "owner"},
 		"message": "Permintaan {{ doc.name }} Anda: {{ doc.workflow_state }}. {{ doc.stock_ops_approval_note or '' }}",

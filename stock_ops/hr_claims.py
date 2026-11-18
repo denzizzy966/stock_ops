@@ -99,8 +99,11 @@ def hr_caps():
 	out["approver_name"] = frappe.utils.get_fullname(approver) if approver else None
 	out["can_approve"] = "Expense Approver" in frappe.get_roles() or _is_hr_admin()
 	for kind, dt in KINDS.items():
+		can_create = bool(frappe.has_permission(dt, "create"))
 		out[kind] = {
-			"can_request": bool(emp) and bool(frappe.has_permission(dt, "create")),
+			"can_request": bool(emp) and can_create,
+			# Alasan tombol "buat" disembunyikan — ditampilkan di daftar agar user tahu harus minta apa ke HR.
+			"why_not": None if (emp and can_create) else ("no_employee" if not emp else "no_permission"),
 			"todo": frappe.db.count(dt, _todo_filters(kind, user)) if out["can_approve"] else 0,
 		}
 	return out

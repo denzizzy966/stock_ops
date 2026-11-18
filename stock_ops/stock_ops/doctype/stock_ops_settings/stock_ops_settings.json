@@ -8,6 +8,8 @@
   "general_section",
   "default_language",
   "flutter_apk_url",
+  "tutorial_url",
+  "tutorial_pdf_url",
   "doc_defaults_section",
   "default_company",
   "default_source_warehouse",
@@ -38,6 +40,8 @@
   "show_se_out",
   "show_se_transfer",
   "show_purchase_receipt",
+  "mr_approval_section",
+  "mr_skip_approval",
   "hr_section",
   "show_expense_claim",
   "show_employee_advance",
@@ -70,6 +74,20 @@
    "fieldtype": "Data",
    "label": "URL APK Flutter (Android)",
    "description": "Tautan unduhan APK Android, mis. /files/StockOps.apk atau URL lengkap. Kosongkan untuk menyembunyikan tombol unduh di PWA."
+  },
+  {
+   "fieldname": "tutorial_url",
+   "fieldtype": "Data",
+   "label": "URL Panduan (Wiki)",
+   "options": "URL",
+   "description": "Tautan \"Buka panduan\" di layar Setelan aplikasi. Kosong = https://erp.halosocia.my.id/tutorial-stock-ops/panduan"
+  },
+  {
+   "fieldname": "tutorial_pdf_url",
+   "fieldtype": "Data",
+   "label": "URL Panduan PDF",
+   "options": "URL",
+   "description": "Tautan \"Unduh panduan (PDF)\" di layar Setelan aplikasi. Kosong = https://erp.halosocia.my.id/files/Tutorial-Stock-Ops.pdf"
   },
   {
    "fieldname": "doc_defaults_section",
@@ -245,6 +263,19 @@
    "default": "1"
   },
   {
+   "fieldname": "mr_approval_section",
+   "fieldtype": "Section Break",
+   "label": "Persetujuan Permintaan Pembelian (MR Purchase)",
+   "description": "Normalnya Permintaan Pembelian menunggu persetujuan atasan (Leave Approver di data Employee) sebelum ter-submit."
+  },
+  {
+   "fieldname": "mr_skip_approval",
+   "fieldtype": "Check",
+   "label": "Lewati persetujuan atasan (langsung Submit)",
+   "default": "0",
+   "description": "Bila dicentang, Permintaan Pembelian dari aplikasi maupun Desk langsung ter-submit (status Approved) tanpa menunggu atasan, dan Purchase Manager langsung mendapat email untuk dibuatkan PO. Permintaan yang sudah Menunggu Persetujuan tetap bisa disetujui/ditolak seperti biasa. Berlaku saat disimpan."
+  },
+  {
    "fieldname": "hr_section",
    "fieldtype": "Section Break",
    "label": "Menu HR",
@@ -323,7 +354,7 @@
  ],
  "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-11-06 02:30:00",
+ "modified": "2026-11-13 11:00:00.000000",
  "modified_by": "Administrator",
  "module": "Stock Ops",
  "name": "Stock Ops Settings",

@@ -17,6 +17,13 @@ class StockOpsSettings(Document):
 		self.validate_issue_purposes()
 		self.validate_user_defaults()
 
+	def on_update(self):
+		# "Lewati persetujuan atasan" (MR Purchase) diubah → susun ulang transisi Workflow MR saat itu juga.
+		if self.has_value_changed("mr_skip_approval"):
+			from stock_ops.setup.install import setup_approval_workflow
+
+			setup_approval_workflow(commit=False)
+
 	def validate_issue_purposes(self):
 		"""Tujuan: cost center harus non-grup & tiap tujuan unik per perusahaan + jenis dokumen
 		("Semua" bertabrakan dengan jenis apa pun bernama sama)."""

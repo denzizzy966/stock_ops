@@ -248,13 +248,20 @@ MR_EVENTS = {
 		"Permintaan pembelian dari <b>{requester}</b> sudah <b>disetujui</b>. Silakan buatkan Purchase Order."),
 	"rejected": ("danger", "Ditolak", "Permintaan pembelian Anda ditolak",
 		"Permintaan pembelian Anda <b>ditolak</b> oleh <b>{approver}</b>. Lihat alasannya di bawah."),
+	# Approved tanpa approver = persetujuan atasan dilewati (Stock Ops Settings) → langsung submit.
+	"submitted": ("success", "Diajukan · tanpa persetujuan atasan", "Siap diproses menjadi Purchase Order",
+		"<b>{requester}</b> mengajukan permintaan pembelian. Persetujuan atasan <b>dilewati</b> (diatur di Stock Ops Settings) — silakan langsung buatkan Purchase Order."),
 }
 
 
 def stock_ops_mr_email(doc, event="pending"):
+	if event == "approved" and not doc.get("stock_ops_approver"):
+		event = "submitted"
 	tone, status, title, intro = MR_EVENTS.get(event, MR_EVENTS["pending"])
 	requester = get_fullname(doc.owner)
-	approver = get_fullname(doc.get("stock_ops_approver")) if doc.get("stock_ops_approver") else "-"
+	approver = get_fullname(doc.get("stock_ops_approver")) if doc.get("stock_ops_approver") else (
+		_("— (dilewati)") if event == "submitted" else "-"
+	)
 	rows = [
 		(
 			f"{r.item_code} — {r.item_name}" if r.item_name and r.item_name != r.item_code else r.item_code,
@@ -290,6 +297,6 @@ def stock_ops_mr_email(doc, event="pending"):
 		cta_url=app,
 		cta_label=_("Setujui / Tolak di Stock Ops") if event == "pending" else _("Lihat permintaan"),
 		secondary_url=get_url_to_form("Material Request", doc.name),
-		secondary_label=_("buat Purchase Order di Desk") if event == "approved" else _("buka di Desk ERPNext"),
+		secondary_label=_("buat Purchase Order di Desk") if event in ("approved", "submitted") else _("buka di Desk ERPNext"),
 		preheader=f"{_(status)} · {doc.name} · {requester}",
 	)

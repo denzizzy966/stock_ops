@@ -29,7 +29,9 @@ const isPurchaseMR = computed(() => doc.value && doc.value.doctype === 'Material
 const canSubmit = computed(
   () => doc.value && doc.value.can_submit && (!doc.value.workflow_state || doc.value.workflow_state === 'Draft')
 )
-const submitLabel = computed(() => (isPurchaseMR.value ? t('approval.submitForApproval') : t('detail.submit')))
+// Persetujuan atasan bisa dilewati lewat Stock Ops Settings → MR Purchase langsung Submit.
+const needsApproval = computed(() => isPurchaseMR.value && master.mrApproval)
+const submitLabel = computed(() => (needsApproval.value ? t('approval.submitForApproval') : t('detail.submit')))
 const canReopen = computed(
   () => doc.value && doc.value.workflow_state === 'Rejected' && doc.value.owner === (app.user && app.user.email)
 )
@@ -134,7 +136,7 @@ onBeforeUnmount(releasePhotos)
           <div v-if="doc.customer"><div class="tiny muted">{{ t('form.customer') }}</div><div class="small">{{ doc.customer }}</div></div>
           <div v-if="doc.purpose"><div class="tiny muted">{{ t('form.purpose') }}</div><div class="small">{{ doc.purpose }}</div></div>
           <div><div class="tiny muted">{{ t('approval.requester') }}</div><div class="small truncate">{{ doc.owner }}</div></div>
-          <div v-if="approver || isPurchaseMR">
+          <div v-if="approver || needsApproval">
             <div class="tiny muted">{{ t('approval.approver') }}</div>
             <div class="small truncate">{{ approver || t('approval.noApprover') }}</div>
           </div>
@@ -190,7 +192,7 @@ onBeforeUnmount(releasePhotos)
       <div v-if="doc.workflow_state === 'Pending Approval'" class="card mt12 tiny muted" style="text-align: center">
         {{ t('approval.waiting') }}
       </div>
-      <div v-if="canSubmit && isPurchaseMR && !approver" class="card mt12 tiny warn-card">
+      <div v-if="canSubmit && needsApproval && !approver" class="card mt12 tiny warn-card">
         <Icon name="warning" /> {{ t('approval.noApproverHint') }}
       </div>
       <button v-if="canSubmit" class="btn ok block mt12" :disabled="busy || !app.online" @click="submit">

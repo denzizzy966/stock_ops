@@ -105,6 +105,10 @@ const open = (r) => router.push(`/hr/${kind.value}/${encodeURIComponent(r.name)}
       <button v-if="caps.can_request" class="btn brand block" style="margin-bottom: 10px" @click="router.push(`/hr/${kind}/new`)">
         <Icon name="plus" /> {{ t('hr.new.' + kind) }}
       </button>
+      <div v-else-if="caps.why_not" class="card warn-card" style="margin-bottom: 10px">
+        <b>{{ t('hr.whyTitle', { label: t('hr.new.' + kind) }) }}</b><br />
+        {{ t('hr.why.' + caps.why_not, { doc: t('hr.title.' + kind) }) }}
+      </div>
 
       <div v-if="loading && !rows.length" class="empty"><div class="big"><Icon name="loading" spin /></div>{{ t('common.loading') }}</div>
       <div v-else-if="!rows.length" class="empty">

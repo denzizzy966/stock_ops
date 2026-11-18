@@ -841,6 +841,7 @@ def _user_caps():
 	can_cancel = is_manager or any(
 		frappe.has_permission(dt, ptype="cancel") for dt in ("Material Request", "Stock Entry")
 	)
+	from stock_ops.approval import mr_approval_required
 	from stock_ops.hr_claims import hr_caps
 	from stock_ops.request_to_pay.api import rtp_caps
 
@@ -848,9 +849,15 @@ def _user_caps():
 		"is_manager": is_manager,
 		"can_cancel": bool(can_cancel),
 		"is_system_manager": _is_system_manager(),
+		# MR Purchase butuh persetujuan atasan? (Stock Ops Settings → Lewati persetujuan atasan)
+		"mr_approval": mr_approval_required(),
 		"rtp": rtp_caps(),
 		"hr": hr_caps(),
 	}
+
+
+TUTORIAL_URL = "https://erp.halosocia.my.id/tutorial-stock-ops/panduan"
+TUTORIAL_PDF_URL = "https://erp.halosocia.my.id/files/Tutorial-Stock-Ops.pdf"
 
 
 def _app_settings():
@@ -864,6 +871,9 @@ def _app_settings():
 		"menu": _menu_settings(s),
 		"default_lang": default_lang,
 		"flutter_apk_url": apk_url,
+		# Tautan panduan di layar Setelan — default ke Wiki publik halosocia bila Settings kosong.
+		"tutorial_url": ((getattr(s, "tutorial_url", None) if s else None) or TUTORIAL_URL).strip(),
+		"tutorial_pdf_url": ((getattr(s, "tutorial_pdf_url", None) if s else None) or TUTORIAL_PDF_URL).strip(),
 		"default_source_warehouse": (getattr(s, "default_source_warehouse", None) or "") if s else "",
 		"caps": _user_caps(),
 	}
@@ -1097,6 +1107,8 @@ def get_bootstrap():
 		"home_prefs": _home_prefs(user),
 		"default_lang": _app["default_lang"],
 		"flutter_apk_url": _app["flutter_apk_url"],
+		"tutorial_url": _app["tutorial_url"],
+		"tutorial_pdf_url": _app["tutorial_pdf_url"],
 		"caps": _app["caps"],
 		"is_approver": bool(is_emp_approver or pending_approvals or _is_system_manager()),
 		"issue_purposes": [p for p in _issue_purposes() if not scope["allowed_companies"] or p["company"] in scope["allowed_companies"]],
@@ -1362,14 +1374,16 @@ def submit_transaction(doctype, name):
 		# PENTING: apply_workflow() melakukan load_from_db() sehingga perubahan in-memory hilang;
 		# maka approver DITULIS ke DB (db_set) dulu agar terbawa saat workflow di-apply + saat
 		# Notification "Pending Approval" mengevaluasi penerima (field stock_ops_approver).
-		if doctype == "Material Request" and getattr(doc, "material_request_type", None) == "Purchase":
-			from stock_ops.approval import resolve_approver
-
-			doc.db_set("stock_ops_approver", resolve_approver(doc.owner))
+		# Bila "Lewati persetujuan atasan" aktif, transisinya langsung "Submit" → approver tak perlu.
 		transitions = get_transitions(doc)
 		if not transitions:
 			frappe.throw(_("Tidak ada aksi workflow yang tersedia untuk dokumen ini."))
-		apply_workflow(doc, transitions[0].get("action"))
+		action = transitions[0].get("action")
+		if action == "Submit for Approval":
+			from stock_ops.approval import resolve_approver
+
+			doc.db_set("stock_ops_approver", resolve_approver(doc.owner))
+		apply_workflow(doc, action)
 	elif doctype == "Stock Reconciliation":
 		_submit_opname(doc)
 	else:
@@ -1578,8 +1592,10 @@ def _approver_preview(doc):
 		return doc.stock_ops_approver
 	if doc.get("workflow_state") not in (None, "", "Draft"):
 		return None
-	from stock_ops.approval import get_approver_or_none
+	from stock_ops.approval import get_approver_or_none, mr_approval_required
 
+	if not mr_approval_required():
+		return None
 	return get_approver_or_none(doc.owner)
 
 

@@ -263,6 +263,29 @@ function clearData() {
       <button class="btn brand block mt16" @click="save">{{ t('settings.saveSettings') }}</button>
     </template>
 
+    <template v-if="master.tutorialUrl || master.tutorialPdfUrl">
+      <div class="section-title">{{ t('settings.guide') }}</div>
+      <div class="card">
+        <a v-if="master.tutorialUrl" :href="master.tutorialUrl" target="_blank" rel="noopener" class="list-item" style="text-decoration: none; color: inherit">
+          <span class="lead-icon" style="background: #2563eb"><Icon name="book" /></span>
+          <div class="grow">
+            <div style="font-weight: 700">{{ t('settings.guideWiki') }}</div>
+            <div class="tiny muted">{{ t('settings.guideWikiDesc') }}</div>
+          </div>
+          <span style="font-size: 22px; color: var(--muted)">›</span>
+        </a>
+        <hr v-if="master.tutorialUrl && master.tutorialPdfUrl" style="border: 0; border-top: 1px solid var(--line); margin: 10px 0" />
+        <a v-if="master.tutorialPdfUrl" :href="master.tutorialPdfUrl" target="_blank" rel="noopener" download class="list-item" style="text-decoration: none; color: inherit">
+          <span class="lead-icon" style="background: #dc2626"><Icon name="download" /></span>
+          <div class="grow">
+            <div style="font-weight: 700">{{ t('settings.guidePdf') }}</div>
+            <div class="tiny muted">{{ t('settings.guidePdfDesc') }}</div>
+          </div>
+          <span style="font-size: 22px; color: var(--muted)">›</span>
+        </a>
+      </div>
+    </template>
+
     <div class="section-title">{{ t('settings.getApp') }}</div>
     <div class="card">
       <button v-if="master.flutterApkUrl" class="list-item" style="width: 100%; text-align: left; border: 0; cursor: pointer" @click="downloadApk">

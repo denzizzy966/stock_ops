@@ -179,6 +179,11 @@ const history = computed(() =>
         </div>
       </div>
 
+      <!-- Tombol Setujui tidak muncul → jelaskan sebabnya (pengajuan sendiri / role belum dimiliki). -->
+      <div v-if="data.blocked" class="card warn-card mt12">
+        <b>{{ t('rtp.blockedTitle') }}</b><br />
+        {{ t('rtp.blocked.' + data.blocked.reason, { role: data.blocked.role }) }}
+      </div>
       <div class="actions">
         <button v-if="data.can_edit" class="btn grow" :disabled="busy" @click="router.push('/rtp/' + encodeURIComponent(name) + '/edit')">
           {{ t('rtp.edit') }}

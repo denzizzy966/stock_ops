@@ -27,8 +27,11 @@ const inWorkflow = computed(() => {
   const w = doc.value && doc.value.workflowState
   return !!w && w !== 'Draft'
 })
-// Label tombol finalisasi: untuk MR Purchase = "Ajukan Persetujuan", lainnya = "Submit".
-const submitLabel = computed(() => (doc.value && doc.value.type === 'PR' ? t('approval.submitForApproval') : t('detail.submit')))
+// Label tombol finalisasi: untuk MR Purchase = "Ajukan Persetujuan" (kecuali persetujuan atasan
+// dilewati di Stock Ops Settings), lainnya = "Submit".
+const submitLabel = computed(() =>
+  doc.value && doc.value.type === 'PR' && master.mrApproval ? t('approval.submitForApproval') : t('detail.submit')
+)
 
 // Foto dimuat dari IndexedDB sebagai object URL
 const photoViews = ref([])

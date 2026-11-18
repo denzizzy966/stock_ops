@@ -15,6 +15,15 @@ def get_approver_or_none(user=None):
 	return approver or None
 
 
+def mr_approval_required():
+	"""MR Purchase wajib disetujui atasan? False bila "Lewati persetujuan atasan" dicentang di
+	Stock Ops Settings. Aman sebelum migrate (field belum ada) → tetap wajib."""
+	try:
+		return not frappe.db.get_single_value("Stock Ops Settings", "mr_skip_approval")
+	except Exception:
+		return True
+
+
 def resolve_approver(user=None):
 	"""Line manager (leave approver) untuk user. Memblokir bila tak ditemukan.
 

@@ -90,9 +90,55 @@ def _my_roles():
 	return roles & set(RTP_ROLES)
 
 
+def _acting_roles():
+	"""Role yang benar-benar bisa menjalankan transisi Workflow. Seperti Desk, System Manager TIDAK
+	otomatis jadi approver (hanya Administrator) — dipakai untuk antrean "Perlu Tindakan" agar tidak
+	menampilkan pengajuan yang tombol aksinya tidak akan muncul."""
+	if frappe.session.user == "Administrator":
+		return set(RTP_ROLES)
+	return set(frappe.get_roles()) & set(RTP_ROLES)
+
+
 def _act_states(roles=None):
-	roles = _my_roles() if roles is None else roles
+	roles = _acting_roles() if roles is None else roles
 	return [s for s, r in STATE_ROLE.items() if r in roles]
+
+
+def _my_actions(doc):
+	"""Aksi Workflow yang benar-benar bisa dijalankan user pada dokumen ini.
+
+	get_transitions() TIDAK menyaring larangan self-approval (Desk menyaringnya di JS; server baru
+	menolak saat aksi dijalankan) → saring di sini agar tombol "Setujui" tak muncul lalu gagal."""
+	from frappe.model.workflow import get_transitions, has_approval_access
+
+	user = frappe.session.user
+	try:
+		return [t.action for t in get_transitions(doc) if has_approval_access(user, doc, t)]
+	except Exception:
+		return []
+
+
+def _blocked_reason(doc, actions):
+	"""Kenapa user tidak punya aksi di tahap ini (agar PWA bisa menjelaskan, bukan tombol hilang diam-diam).
+
+	- no_role       : tahap ini butuh role yang tidak dimiliki user.
+	- self_approval : user pembuat pengajuan ini; tahap ini melarang menyetujui pengajuan sendiri.
+	"""
+	role = STATE_ROLE.get(doc.workflow_state)
+	if not role or "Approve" in actions or "Mark as Paid" in actions:
+		return None
+	if role not in _acting_roles():
+		return {"reason": "no_role", "role": role}
+	from frappe.model.workflow import get_workflow_name
+
+	wf = get_workflow_name(DT)
+	no_self = wf and frappe.db.exists(
+		"Workflow Transition",
+		{"parent": wf, "state": doc.workflow_state, "action": "Approve", "allow_self_approval": 0},
+	)
+	if no_self and frappe.session.user == doc.owner:
+		return {"reason": "self_approval", "role": role}
+	return None
 
 
 def rtp_caps():
@@ -100,7 +146,7 @@ def rtp_caps():
 	if not frappe.db.exists("DocType", DT):
 		return {"enabled": False}
 	roles = _my_roles()
-	states = _act_states(roles)
+	states = _act_states()
 	todo = 0
 	if states:
 		filters = {"workflow_state": ["in", states]}
@@ -234,13 +280,8 @@ def _load(name, ptype="read"):
 @frappe.whitelist()
 def get_rtp(name):
 	"""Detail pengajuan + aksi Workflow yang boleh dijalankan user + riwayat persetujuan."""
-	from frappe.model.workflow import get_transitions
-
 	doc = _load(name)
-	try:
-		actions = [t.action for t in get_transitions(doc)]
-	except Exception:
-		actions = []
+	actions = _my_actions(doc)
 	history = frappe.get_all(
 		"Comment",
 		filters={"reference_doctype": DT, "reference_name": name, "comment_type": ["in", ["Workflow", "Comment", "Info"]]},
@@ -270,6 +311,7 @@ def get_rtp(name):
 	return {
 		"doc": data,
 		"actions": list(dict.fromkeys(actions)),
+		"blocked": _blocked_reason(doc, actions),
 		"can_edit": _can_edit(doc),
 		"history": history,
 	}

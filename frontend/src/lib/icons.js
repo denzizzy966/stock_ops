@@ -11,6 +11,7 @@ import {
   faArrowsRotate,
   faBasketShopping,
   faBell,
+  faBookOpen,
   faBoxOpen,
   faCamera,
   faCartShopping,
@@ -95,5 +96,6 @@ export const ICONS = {
   inbox: faInbox,
   receipt: faReceipt,
   basket: faBasketShopping,
-  question: faCircleQuestion
+  question: faCircleQuestion,
+  book: faBookOpen
 }
