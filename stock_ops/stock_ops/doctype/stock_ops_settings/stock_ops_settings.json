@@ -47,6 +47,7 @@
   "show_employee_advance",
   "rtp_section",
   "show_request_to_pay",
+  "rtp_fat_companies",
   "rtp_hod_skip_urgent",
   "rtp_hod_departments",
   "rtp_pi_section",
@@ -306,6 +307,13 @@
    "description": "Menu pengajuan pembayaran vendor. Tetap hanya tampil untuk user yang punya role RTP (Requester, Tax Reviewer, FAT/HOD/Global Approver, Payment Processor, Finance)."
   },
   {
+   "fieldname": "rtp_fat_companies",
+   "fieldtype": "Table",
+   "label": "Company Wajib Persetujuan FAT",
+   "options": "Request to Pay FAT Company",
+   "description": "Hanya pengajuan dari company di sini yang melewati tahap Persetujuan FAT (setelah Tinjauan Pajak). Company lain langsung Tinjauan Pajak → (HOD) → Global Team. Kosong = tidak ada tahap FAT."
+  },
+  {
    "fieldname": "rtp_hod_skip_urgent",
    "fieldtype": "Check",
    "label": "Urgent Lewati HOD",
@@ -317,7 +325,7 @@
    "fieldtype": "Table",
    "label": "Departemen Wajib Persetujuan HOD",
    "options": "Request to Pay HOD Department",
-   "description": "Pengajuan dari departemen ini melewati HOD (setelah FAT, sebelum Global Team). Departemen bersifat per company — company tanpa baris di sini tidak memakai HOD."
+   "description": "Pengajuan dari departemen ini melewati HOD (setelah Tinjauan Pajak/FAT, sebelum Global Team). Departemen bersifat per company — company tanpa baris di sini tidak memakai HOD."
   },
   {
    "fieldname": "rtp_pi_section",

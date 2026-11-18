@@ -32,9 +32,13 @@ _ACTIONS = ["Submit", "Approve", "Reject", "Mark as Paid", "Reopen"]
 _TRANSITIONS = [
 	# (from, action, to, role, condition, allow_self_approval)
 	("Draft", "Submit", "Pending Tax Review", "RTP Requester", "", 1),
-	("Pending Tax Review", "Approve", "Pending FAT Approval", "RTP Tax Reviewer", "", 1),
+	# Satu aksi "Approve" dengan beberapa tujuan — kondisi memilih cabang:
+	# FAT hanya untuk company di Settings "Company Wajib Persetujuan FAT" (needs_fat_approval);
+	# HOD hanya untuk departemen tertentu (needs_hod_approval). Contoh RMI: Tax → (HOD) → Global.
+	("Pending Tax Review", "Approve", "Pending FAT Approval", "RTP Tax Reviewer", "doc.requires_fat", 1),
+	("Pending Tax Review", "Approve", "Pending HOD Approval", "RTP Tax Reviewer", "not doc.requires_fat and doc.requires_hod", 1),
+	("Pending Tax Review", "Approve", "Pending Global Approval", "RTP Tax Reviewer", "not doc.requires_fat and not doc.requires_hod", 1),
 	("Pending Tax Review", "Reject", "Rejected", "RTP Tax Reviewer", "", 1),
-	# Satu aksi "Approve" dengan dua tujuan — kondisi memilih cabang (lihat needs_hod_approval).
 	("Pending FAT Approval", "Approve", "Pending Global Approval", "RTP FAT Approver", "not doc.requires_hod", 1),
 	("Pending FAT Approval", "Approve", "Pending HOD Approval", "RTP FAT Approver", "doc.requires_hod", 1),
 	("Pending FAT Approval", "Reject", "Rejected", "RTP FAT Approver", "", 1),
@@ -74,6 +78,9 @@ def setup_request_to_pay():
 			).insert(ignore_permissions=True)
 	_grant_masters()
 	_init_setting_defaults()
+	from stock_ops.request_to_pay.doctype.request_to_pay.request_to_pay import refresh_routing_flags
+
+	refresh_routing_flags()
 	from stock_ops.request_to_pay.accounting import ensure_custom_fields
 
 	ensure_custom_fields()

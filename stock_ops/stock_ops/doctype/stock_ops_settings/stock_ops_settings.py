@@ -12,6 +12,12 @@ STOCK_OPS_ROLES = ("Stock Ops User", "Stock Ops Manager")
 PURPOSE_KINDS = {"Semua": ("Stock Out", "Penerimaan Barang"), "Stock Out": ("Stock Out",), "Penerimaan Barang": ("Penerimaan Barang",)}
 
 
+def _companies_changed(doc, table):
+	before = doc.get_doc_before_save()
+	key = lambda d: sorted(r.company for r in (d.get(table) or []) if r.company)
+	return before is None or key(before) != key(doc)
+
+
 class StockOpsSettings(Document):
 	def validate(self):
 		self.validate_issue_purposes()
@@ -23,6 +29,11 @@ class StockOpsSettings(Document):
 			from stock_ops.setup.install import setup_approval_workflow
 
 			setup_approval_workflow(commit=False)
+		# Daftar company FAT diubah → pengajuan yang belum ditinjau Pajak ikut cabang yang baru.
+		if _companies_changed(self, "rtp_fat_companies"):
+			from stock_ops.request_to_pay.doctype.request_to_pay.request_to_pay import refresh_routing_flags
+
+			refresh_routing_flags({r.company for r in (self.get("rtp_fat_companies") or []) if r.company})
 
 	def validate_issue_purposes(self):
 		"""Tujuan: cost center harus non-grup & tiap tujuan unik per perusahaan + jenis dokumen

@@ -40,6 +40,7 @@
   "total_payment",
   "approval_section",
   "workflow_state",
+  "requires_fat",
   "requires_hod",
   "approval_note",
   "col_appr",
@@ -234,6 +235,14 @@
    "no_copy": 1,
    "in_list_view": 1,
    "in_standard_filter": 1
+  },
+  {
+   "fieldname": "requires_fat",
+   "fieldtype": "Check",
+   "label": "Perlu Persetujuan FAT",
+   "read_only": 1,
+   "no_copy": 1,
+   "description": "Diisi otomatis saat disimpan: company ada di daftar Company Wajib Persetujuan FAT (Stock Ops Settings)."
   },
   {
    "fieldname": "requires_hod",

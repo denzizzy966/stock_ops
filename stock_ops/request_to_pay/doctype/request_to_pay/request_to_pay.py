@@ -4,7 +4,8 @@
 # Setelah Approved, Finance membuat Purchase Invoice dari sini (request_to_pay/accounting.py);
 # pelunasan PI (Payment Entry) mengubah status menjadi Paid secara otomatis.
 # Alur persetujuan memakai Workflow "Request to Pay Approval" (dibuat di setup/rtp.py):
-#   Draft → Pending Tax Review → Pending FAT Approval → (Pending HOD Approval) → Pending Global Approval
+#   Draft → Pending Tax Review → (Pending FAT Approval) → (Pending HOD Approval) → Pending Global Approval
+#   FAT hanya untuk company di Settings "Company Wajib Persetujuan FAT"; HOD hanya untuk departemen tertentu.
 #         → Approved (docstatus 1) → Paid
 # Multi-company: company wajib; department & unit bisnis (Cost Center) harus milik company yang sama;
 # mata uang mengikuti default company (IDR / THB).
@@ -31,6 +32,7 @@ class RequesttoPay(Document):
 		self._validate_company_links()
 		self._validate_invoices()
 		self.calculate_totals()
+		self.requires_fat = 1 if needs_fat_approval(self) else 0
 		self.requires_hod = 1 if needs_hod_approval(self) else 0
 		# Judul list = vendor yang dibayar (pengaju & total sudah punya kolom sendiri).
 		vendors = list(dict.fromkeys((r.vendor_name or "").strip() for r in self.invoices if r.vendor_name))
@@ -124,12 +126,42 @@ class RequesttoPay(Document):
 			on_state_change(self)
 
 
+def fat_companies():
+	settings = frappe.get_cached_doc("Stock Ops Settings")
+	return {row.company for row in (settings.get("rtp_fat_companies") or []) if row.company}
+
+
+def needs_fat_approval(doc):
+	"""Apakah pengajuan ini harus lewat Persetujuan FAT (setelah Tinjauan Pajak)?
+
+	FAT adalah tahap milik company tertentu (di Jotform: cabang "Manager FAT" → Approval Tax →
+	Approval FAT), bukan tahap semua company. Daftarnya di Stock Ops Settings
+	"Company Wajib Persetujuan FAT"; company lain (mis. RMI) langsung Tax → (HOD) → Global Team.
+	Hasilnya disimpan di `doc.requires_fat` dan dipakai kondisi transisi Workflow.
+	"""
+	return bool(doc.company) and doc.company in fat_companies()
+
+
+def refresh_routing_flags(fat=None):
+	"""Daftar company FAT berubah → hitung ulang requires_fat pengajuan yang BELUM melewati Tinjauan
+	Pajak (Draft / Pending Tax Review / Rejected), supaya Approve Tax memilih cabang yang benar."""
+	fat = fat_companies() if fat is None else set(fat)
+	for r in frappe.get_all(
+		"Request to Pay",
+		filters={"docstatus": 0, "workflow_state": ["in", ["Draft", "Pending Tax Review", "Rejected"]]},
+		fields=["name", "company", "requires_fat"],
+	):
+		want = 1 if r.company in fat else 0
+		if (r.requires_fat or 0) != want:
+			frappe.db.set_value("Request to Pay", r.name, "requires_fat", want, update_modified=False)
+
+
 def needs_hod_approval(doc):
-	"""Apakah pengajuan ini harus lewat persetujuan HOD (setelah FAT, sebelum Global Team)?
+	"""Apakah pengajuan ini harus lewat persetujuan HOD (setelah Tax/FAT, sebelum Global Team)?
 
 	Di Jotform: departemen OPS yang TIDAK urgent → Approval HOD; yang urgent langsung lanjut.
 	Hasilnya disimpan di `doc.requires_hod` dan dipakai kondisi transisi Workflow
-	(FAT "Approve" → Pending HOD Approval bila 1, → Pending Global Approval bila 0).
+	(Approve Tax/FAT → Pending HOD Approval bila 1, → Pending Global Approval bila 0).
 
 	Aturan diatur Finance di Stock Ops Settings (tanpa ubah kode):
 	  - "Departemen Wajib Persetujuan HOD": daftar Department. Department bersifat per company
